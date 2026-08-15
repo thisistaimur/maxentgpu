@@ -1,0 +1,22 @@
+# Authors and Citation
+
+## Authors
+
+- **Taimur Khan**. Author, maintainer.
+
+## Citation
+
+Source:
+[`DESCRIPTION`](https://github.com/thisistaimur/maxentgpu/blob/main/DESCRIPTION)
+
+Khan T (2026). *maxentgpu: Maximum-Entropy Presence-Background Models
+with Torch*. R package version 0.0.0.9000,
+<https://github.com/thisistaimur/maxentgpu>.
+
+    @Manual{,
+      title = {maxentgpu: Maximum-Entropy Presence-Background Models with Torch},
+      author = {Taimur Khan},
+      year = {2026},
+      note = {R package version 0.0.0.9000},
+      url = {https://github.com/thisistaimur/maxentgpu},
+    }
