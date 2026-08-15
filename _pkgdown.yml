@@ -1,0 +1,19 @@
+url: https://thisistaimur.github.io/maxentgpu/
+
+template:
+  bootstrap: 5
+
+development:
+  mode: auto
+
+home:
+  title: Maximum-Entropy Presence-Background Models with Torch
+  description: >
+    Auditable maximum-entropy presence-background models on CPU and supported
+    Torch accelerators.
+
+reference:
+  - title: Backend diagnostics
+    contents:
+      - maxent_device_probe
+      - maxent_accelerators

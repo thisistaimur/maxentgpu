@@ -1,0 +1,15 @@
+^\.github$
+^\.r-lib$
+^\.cache$
+^\.Rproj\.user$
+^AGENTS\.md$
+^CONTRIBUTING\.md$
+^CRAN-READINESS\.md$
+^LICENSE\.md$
+^PLAN\.md$
+^_pkgdown\.yml$
+^README\.Rmd$
+^benchmarks$
+^docs$
+^tools$
+^tests/fixtures/.*/\.gitkeep$

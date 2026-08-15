@@ -1,0 +1,9 @@
+species,longitude,latitude,x1,x2
+tiny-species,0,2,0.55,0.65
+tiny-species,1,2,0.65,0.75
+tiny-species,2,2,0.75,0.55
+tiny-species,3,2,0.85,0.85
+tiny-species,0,3,0.60,0.60
+tiny-species,1,3,0.70,0.80
+tiny-species,2,3,0.80,0.70
+tiny-species,3,3,0.90,0.90

@@ -1,0 +1,5 @@
+Generator: tools/generate-maxnet-fixtures.R
+MaxnetVersion: 0.1.4
+RVersion: R version 4.6.1 (2026-06-24)
+Command: Rscript tools/generate-maxnet-fixtures.R
+        '/Users/khant/Documents/GitHub/maxentgpu'

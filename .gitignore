@@ -1,0 +1,11 @@
+.Rhistory
+.RData
+.Rproj.user/
+.r-lib/
+.cache/
+docs/
+*.Rcheck/
+*.tar.gz
+tests/fixtures/java-maxent/*
+!tests/fixtures/java-maxent/.gitkeep
+!tests/fixtures/java-maxent/README.md

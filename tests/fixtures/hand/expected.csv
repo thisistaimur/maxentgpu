@@ -1,0 +1,8 @@
+case,beta1,beta2,log_z,presence_score,smooth_objective,gradient1,gradient2,expected_status
+one-predictor,1,0,0.6201145069582775,1,-0.3798854930417225,-0.2689414213699951,NA,ok
+two-predictors,1,-0.5,0.4010443105784390,0.75,-0.3489556894215610,-0.2689414213699952,-0.1224593312018547,ok
+weighted-background,1,0,0.8279889392428698,1,-0.1720110607571302,-0.1092317725730359,NA,ok
+duplicated-presences,1,0,0.6201145069582775,1,-0.3798854930417225,-0.2689414213699951,NA,ok
+constant-predictor,1,0,NA,NA,NA,NA,NA,error_constant_predictor
+missing-value,1,0,NA,NA,NA,NA,NA,error_missing_predictor
+extreme-logits,NA,NA,1000.620114506958,1001,-0.379885493042,NA,NA,ok

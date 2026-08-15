@@ -1,0 +1,26 @@
+Package: maxentgpu
+Title: Maximum-Entropy Presence-Background Models with Torch
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Taimur", "Khan", role = c("aut", "cre"),
+           email = "taimur.khan@ufz.de")
+  )
+Description: A research-software implementation of auditable maximum-entropy
+    presence-background models using 'torch' for tensor computation. The package
+    is currently an experimental executable specification; model fitting is not
+    yet implemented.
+License: MIT + file LICENSE
+URL: https://github.com/thisistaimur/maxentgpu,
+    https://thisistaimur.github.io/maxentgpu/
+BugReports: https://github.com/thisistaimur/maxentgpu/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.3.0)
+Suggests:
+    maxnet (== 0.1.4),
+    testthat (>= 3.0.0),
+    torch (>= 0.17.0)
+Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+Config/roxygen2/version: 8.1.0

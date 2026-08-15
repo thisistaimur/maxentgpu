@@ -1,0 +1,132 @@
+name: CI / Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version:
+    name: Calculate semantic version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.version-string }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Calculate version from Conventional Commits
+        id: semver
+        uses: bitshifted/git-auto-semver@v2
+        with:
+          create_tag: false
+          main_branch: main
+          initial_version: 0.1.0
+      - name: Display calculated version
+        run: echo "Calculated version ${{ steps.semver.outputs.version-string }}"
+
+  check:
+    name: R CMD check (${{ matrix.config.os }}, R ${{ matrix.config.r }})
+    needs: version
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest, r: devel}
+          - {os: ubuntu-latest, r: release}
+          - {os: ubuntu-latest, r: oldrel-1}
+          - {os: macos-latest, r: release}
+          - {os: windows-latest, r: release}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::roxygen2
+          needs: check
+      - name: Use the candidate release version
+        if: github.event_name != 'pull_request'
+        run: Rscript .github/scripts/set-version.R "${{ needs.version.outputs.version }}"
+      - name: Verify generated API documentation is current
+        shell: Rscript {0}
+        run: |
+          roxygen2::roxygenise()
+          status <- system2("git", c("diff", "--exit-code", "--", "NAMESPACE", "man"))
+          if (!identical(status, 0L)) stop("Run roxygen2::roxygenise() and commit the generated files")
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
+          error-on: '"warning"'
+
+  release:
+    name: Publish versioned source release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [version, check]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::roxygen2
+          needs: check
+      - name: Confirm this is still the main branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --tags
+          test "$(git rev-parse origin/main)" = "${GITHUB_SHA}"
+      - name: Set and validate release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.version.outputs.version }}"
+          Rscript .github/scripts/set-version.R "${VERSION}"
+          Rscript -e 'roxygen2::roxygenise()'
+          R CMD build .
+          TARBALL="maxentgpu_${VERSION}.tar.gz"
+          test -f "${TARBALL}"
+          Rscript -e 'rcmdcheck::rcmdcheck(commandArgs(TRUE)[1], args = c("--no-manual", "--as-cran"), error_on = "warning")' "${TARBALL}"
+      - name: Commit and tag the exact released source
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.version.outputs.version }}"
+          TAG="v${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add DESCRIPTION NEWS.md NAMESPACE man
+          git commit -m "chore(release): ${TAG} [skip ci]"
+          git tag -a "${TAG}" -m "${TAG}"
+          git push origin HEAD:main "${TAG}"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: maxentgpu_${{ needs.version.outputs.version }}.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,7 @@
+role,x1,x2,weight
+background,0,0,1
+background,0,1,1
+background,1,0,1
+background,1,1,1
+presence,1,0,1
+presence,1,1,1

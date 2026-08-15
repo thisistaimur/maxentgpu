@@ -1,0 +1,8 @@
+component,version,source,license,sha256,status
+R,4.6.1,https://cran.r-project.org/,GPL-2-or-GPL-3,,local-development
+torch,0.17.0,https://CRAN.R-project.org/package=torch,MIT + file LICENSE,,pinned
+terra,1.9-34,https://CRAN.R-project.org/package=terra,GPL (>= 3),,pinned-for-phase-5
+maxnet,0.1.4,https://CRAN.R-project.org/package=maxnet,MIT + file LICENSE,,pinned
+virtualspecies,1.6.1,https://CRAN.R-project.org/package=virtualspecies,GPL (>= 2),,pinned-for-phase-6
+java,17,https://adoptium.net/,GPL-2-with-Classpath-Exception,,reference-runtime
+java-maxent,3.4.4,https://github.com/mrmaxent/Maxent,MIT plus third-party notices,REPLACE_AFTER_LICENSED_ACQUISITION,blocked-awaiting-jar
