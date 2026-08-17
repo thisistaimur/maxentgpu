@@ -1,7 +1,7 @@
 #' maxentgpu: maximum-entropy models with Torch
 #'
-#' `maxentgpu` is currently an executable specification. Phase 0 exports only
-#' backend diagnostics; fitting and prediction are intentionally not available.
+#' `maxentgpu` currently exports backend diagnostics while model fitting and
+#' prediction capabilities are under active development.
 #'
 #' @keywords internal
 "_PACKAGE"

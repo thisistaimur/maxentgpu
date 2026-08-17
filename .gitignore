@@ -9,3 +9,5 @@ docs/
 tests/fixtures/java-maxent/*
 !tests/fixtures/java-maxent/.gitkeep
 !tests/fixtures/java-maxent/README.md
+
+.DS_Store

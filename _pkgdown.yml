@@ -2,6 +2,25 @@ url: https://thisistaimur.github.io/maxentgpu/
 
 template:
   bootstrap: 5
+  bslib:
+    bg: "#f7f8fc"
+    fg: "#21143f"
+    primary: "#512580"
+    secondary: "#35558f"
+    success: "#58c95b"
+    info: "#249995"
+    warning: "#f3d51b"
+    link-color: "#512580"
+    link-hover-color: "#249995"
+    border-radius: 0.75rem
+    btn-border-radius: 0.6rem
+    base_font: "system-ui"
+    heading_font: "system-ui"
+
+navbar:
+  structure:
+    left: [reference, articles, tutorials, news]
+    right: [github, lightswitch]
 
 development:
   mode: auto

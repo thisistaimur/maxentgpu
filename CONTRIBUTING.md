@@ -1,9 +1,8 @@
 # Contributing to maxentgpu
 
-Work follows the phases and STOP/GO gates in `PLAN.md`. Preserve unrelated changes,
-make the smallest coherent vertical slice, and record exact verification commands and
-results. Never weaken a numerical tolerance or regenerate golden files merely to make
-a check pass.
+Preserve unrelated changes, make the smallest coherent change, and record exact
+verification commands and results. Never weaken a numerical tolerance or regenerate
+golden files merely to make a check pass.
 
 Files under `sources/` are synchronized, read-only reference material and must not be
 edited, renamed, moved, or deleted.
@@ -29,11 +28,11 @@ Reference fixture regeneration is an explicit maintainer action. Review inputs,
 versions, commands, output diffs, and provenance together. Do not commit `maxent.jar`
 or opaque benchmark binaries.
 
-## Accelerator checkpoint
+## Accelerator testing
 
-During Phase 3, archive CPU/MPS results from the Apple Silicon development machine and
-CPU/CUDA results from a clean checkout on the DGX Spark using the same pinned manifest.
-A skipped backend leaves Gate 3 pending.
+When accelerator support is tested, archive CPU/MPS results from the Apple Silicon
+development machine and CPU/CUDA results from a clean checkout on the DGX Spark using
+the same pinned manifest. Record skipped or unavailable backends explicitly.
 
 ## API documentation and website
 

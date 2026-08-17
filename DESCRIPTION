@@ -6,9 +6,9 @@ Authors@R: c(
            email = "taimur.khan@ufz.de")
   )
 Description: A research-software implementation of auditable maximum-entropy
-    presence-background models using 'torch' for tensor computation. The package
-    is currently an experimental executable specification; model fitting is not
-    yet implemented.
+    presence-background models using 'torch' for tensor computation. Backend
+    diagnostics are available now, with model fitting and prediction capabilities
+    under active development.
 License: MIT + file LICENSE
 URL: https://github.com/thisistaimur/maxentgpu,
     https://thisistaimur.github.io/maxentgpu/

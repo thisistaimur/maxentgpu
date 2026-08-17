@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1386" viewBox="0 0 1200 1386" fill="none">
+  <title>maxentgpu hex sticker logo</title>
+  <desc>Editable R package hex logo with a rasterized world, species occurrence points, and GPU circuitry in viridis colors.</desc>
+
+  <defs>
+    <!-- Viridis: #440154 #3B528B #21918C #5DC863 #FDE725 -->
+    <linearGradient id="hexGradient" x1="180" y1="130" x2="1020" y2="1250" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#440154"/>
+      <stop offset="0.48" stop-color="#282A66"/>
+      <stop offset="1" stop-color="#173A52"/>
+    </linearGradient>
+    <linearGradient id="viridisGradient" x1="265" y1="790" x2="951" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#440154"/>
+      <stop offset="0.25" stop-color="#3B528B"/>
+      <stop offset="0.5" stop-color="#21918C"/>
+      <stop offset="0.75" stop-color="#5DC863"/>
+      <stop offset="1" stop-color="#FDE725"/>
+    </linearGradient>
+    <radialGradient id="oceanGradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(500 340) rotate(55) scale(650)">
+      <stop stop-color="#3B528B"/>
+      <stop offset="0.72" stop-color="#263D72"/>
+      <stop offset="1" stop-color="#1D2857"/>
+    </radialGradient>
+    <clipPath id="hexClip">
+      <path d="M600 64L1112 360V1026L600 1322L88 1026V360L600 64Z"/>
+    </clipPath>
+    <clipPath id="globeClip">
+      <circle cx="565" cy="515" r="338"/>
+    </clipPath>
+    <filter id="shadow" x="15" y="0" width="1170" height="1386" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#14001D" flood-opacity="0.38"/>
+    </filter>
+    <filter id="pointGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Classic R-package hex sticker -->
+  <g id="hexagon">
+    <path id="white-sticker-border" d="M600 24L1146 339V1047L600 1362L54 1047V339L600 24Z" fill="#FFFFFF" filter="url(#shadow)"/>
+    <path id="hex-background" d="M600 64L1112 360V1026L600 1322L88 1026V360L600 64Z" fill="url(#hexGradient)"/>
+    <path id="viridis-keyline" d="M600 82L1096 369V1017L600 1304L104 1017V369L600 82Z" stroke="url(#viridisGradient)" stroke-width="8"/>
+  </g>
+
+  <g id="logo-art" clip-path="url(#hexClip)">
+    <!-- The world is intentionally large and unmistakable -->
+    <g id="world-globe">
+      <circle id="ocean" cx="565" cy="515" r="338" fill="url(#oceanGradient)" stroke="#70D151" stroke-width="13"/>
+
+      <g id="world-map" clip-path="url(#globeClip)">
+        <!-- Simplified editable continent shapes -->
+        <g id="continents" fill="#21918C" stroke="#67D18A" stroke-width="5" stroke-linejoin="round">
+          <path id="north-america" d="M239 330L288 267L363 227L455 234L510 279L489 326L430 339L395 382L354 391L329 442L284 427L263 380L220 367Z"/>
+          <path id="central-america" d="M329 438L361 447L386 482L414 497L403 519L367 505L346 476L318 463Z"/>
+          <path id="south-america" d="M407 500L461 507L500 551L493 616L469 680L433 753L400 798L375 763L382 697L359 632L365 566Z"/>
+          <path id="greenland" d="M465 205L518 181L562 209L543 260L492 274L455 242Z"/>
+          <path id="europe" d="M574 331L617 304L662 311L680 343L654 369L609 367L588 394L559 375Z"/>
+          <path id="africa" d="M588 390L665 374L713 421L704 496L670 576L623 637L580 593L554 516L559 442Z"/>
+          <path id="asia" d="M665 304L747 258L842 270L901 319L892 372L839 394L803 449L745 457L704 421L680 364Z"/>
+          <path id="india-se-asia" d="M739 449L778 462L791 518L821 548L794 568L758 534L724 490Z"/>
+          <path id="australia" d="M809 610L871 590L916 626L899 684L841 702L796 665Z"/>
+          <path id="madagascar" d="M712 590L726 615L716 657L699 635Z"/>
+        </g>
+
+        <!-- Raster cells remain individual editable rectangles -->
+        <g id="suitability-raster" stroke="#FFFFFF" stroke-opacity="0.34" stroke-width="2">
+          <rect x="270" y="300" width="64" height="64" fill="#440154" fill-opacity="0.86"/>
+          <rect x="334" y="300" width="64" height="64" fill="#3B528B" fill-opacity="0.86"/>
+          <rect x="398" y="300" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="334" y="364" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="398" y="364" width="64" height="64" fill="#5DC863" fill-opacity="0.9"/>
+          <rect x="398" y="428" width="64" height="64" fill="#FDE725" fill-opacity="0.92"/>
+          <rect x="398" y="492" width="64" height="64" fill="#5DC863" fill-opacity="0.9"/>
+          <rect x="398" y="556" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="398" y="620" width="64" height="64" fill="#3B528B" fill-opacity="0.86"/>
+          <rect x="590" y="364" width="64" height="64" fill="#3B528B" fill-opacity="0.84"/>
+          <rect x="654" y="364" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="590" y="428" width="64" height="64" fill="#5DC863" fill-opacity="0.9"/>
+          <rect x="654" y="428" width="64" height="64" fill="#FDE725" fill-opacity="0.92"/>
+          <rect x="590" y="492" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="654" y="492" width="64" height="64" fill="#5DC863" fill-opacity="0.9"/>
+          <rect x="718" y="300" width="64" height="64" fill="#3B528B" fill-opacity="0.84"/>
+          <rect x="782" y="300" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="782" y="364" width="64" height="64" fill="#5DC863" fill-opacity="0.9"/>
+          <rect x="846" y="364" width="64" height="64" fill="#FDE725" fill-opacity="0.92"/>
+          <rect x="782" y="620" width="64" height="64" fill="#21918C" fill-opacity="0.86"/>
+          <rect x="846" y="620" width="64" height="64" fill="#5DC863" fill-opacity="0.9"/>
+        </g>
+
+        <!-- Latitude/longitude grid makes the globe visibly spatial -->
+        <g id="latitude-longitude-grid" fill="none" stroke="#DCEFE8" stroke-opacity="0.31" stroke-width="4">
+          <ellipse cx="565" cy="515" rx="162" ry="338"/>
+          <ellipse cx="565" cy="515" rx="275" ry="338"/>
+          <path d="M227 515H903"/>
+          <ellipse cx="565" cy="515" rx="323" ry="142"/>
+          <ellipse cx="565" cy="515" rx="273" ry="252"/>
+        </g>
+      </g>
+
+      <!-- Species occurrence points -->
+      <g id="occurrence-points" fill="#FDE725" stroke="#FFFFFF" stroke-width="5" filter="url(#pointGlow)">
+        <circle cx="354" cy="353" r="13"/>
+        <circle cx="417" cy="416" r="13"/>
+        <circle cx="428" cy="476" r="13"/>
+        <circle cx="438" cy="566" r="13"/>
+        <circle cx="623" cy="407" r="13"/>
+        <circle cx="672" cy="455" r="13"/>
+        <circle cx="641" cy="526" r="13"/>
+        <circle cx="803" cy="352" r="13"/>
+        <circle cx="856" cy="395" r="13"/>
+        <circle cx="849" cy="654" r="13"/>
+      </g>
+    </g>
+
+    <!-- Compact GPU chip attached to the raster world -->
+    <g id="gpu-chip" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="764" y="665" width="238" height="188" rx="38" fill="#21104A" stroke="#FDE725" stroke-width="12"/>
+      <g id="gpu-pins" stroke="#5DC863" stroke-width="11">
+        <path d="M797 665V625M850 665V625M903 665V625M956 665V625"/>
+        <path d="M797 853V893M850 853V893M903 853V893M956 853V893"/>
+        <path d="M764 704H724M764 759H724M764 814H724"/>
+        <path d="M1002 704H1042M1002 759H1042M1002 814H1042"/>
+      </g>
+      <rect x="813" y="711" width="140" height="96" rx="20" fill="#3B528B" stroke="#21918C" stroke-width="7"/>
+      <text x="883" y="779" fill="#FFFFFF" text-anchor="middle" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="48" font-weight="800">GPU</text>
+      <path id="world-to-gpu" d="M665 692C702 692 721 719 753 719" stroke="#FDE725" stroke-width="12"/>
+      <path d="M730 696L754 719L730 742" stroke="#FDE725" stroke-width="11"/>
+    </g>
+
+    <!-- Dark wordmark band keeps the name readable at sticker size -->
+    <g id="wordmark">
+      <path id="wordmark-band" d="M94 882H1106V1080H94Z" fill="#190B35" fill-opacity="0.97"/>
+      <path d="M150 882H1050" stroke="url(#viridisGradient)" stroke-width="10" stroke-linecap="round"/>
+      <text id="package-name" x="600" y="1000" fill="#FFFFFF" text-anchor="middle" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="126" font-weight="800" letter-spacing="-6">maxent<tspan fill="#FDE725">gpu</tspan></text>
+      <text id="tagline" x="600" y="1052" fill="#8ED9B2" text-anchor="middle" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="650" letter-spacing="7">SPECIES DISTRIBUTION MODELLING</text>
+    </g>
+
+    <g id="r-language-badge">
+      <circle cx="600" cy="1155" r="64" fill="#FFFFFF" stroke="#5DC863" stroke-width="9"/>
+      <text x="600" y="1183" fill="#3B528B" text-anchor="middle" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="80" font-style="italic" font-weight="800">R</text>
+    </g>
+  </g>
+</svg>

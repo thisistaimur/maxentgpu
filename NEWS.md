@@ -2,6 +2,6 @@
 
 ## Initial development
 
-- Added the Phase 0 package skeleton and mathematical specification.
+- Added the package skeleton and mathematical specification.
 - Added CPU, CUDA, and MPS capability diagnostics.
 - Added reproducible hand and `maxnet` reference fixtures.
