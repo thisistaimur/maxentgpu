@@ -12,6 +12,10 @@ presence <- samples[c("x1", "x2")]
 background <- background[c("x1", "x2")]
 reference <- utils::read.csv(file.path(fixture_dir, "predictions.csv"))
 scales <- utils::read.csv(file.path(fixture_dir, "scales.csv"))
+penalties <- utils::read.csv(file.path(fixture_dir, "penalty_factors.csv"))
+if (any(!is.finite(penalties$penalty_factor)) || any(penalties$penalty_factor <= 0)) {
+  stop("maxnet penalty-factor metadata is invalid.")
+}
 
 fit <- maxentgpu::maxent_fit(
   x = presence,
@@ -63,3 +67,5 @@ report[report$comparison == "raw_multiplicative_mapping", c("ratio_median", "log
 )
 write.csv(report, file = "", row.names = FALSE)
 message("Comparison is diagnostic only: scales are not declared equivalent.")
+message("maxnet penalty factors: ", paste(penalties$feature, penalties$penalty_factor,
+                                           sep = "=", collapse = ", "))

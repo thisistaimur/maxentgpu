@@ -9,6 +9,8 @@ diagnostic target, not an unregularized equivalence claim.
 Each target also stores its fitted `alpha`, entropy, regularization value, and
 background count in `tests/fixtures/maxnet/*scales.csv`; comparisons can therefore
 remove the reference intercept explicitly instead of estimating it implicitly.
+The corresponding `*penalty_factors.csv` files preserve maxnet's feature-specific
+glmnet penalty factors for the regularization mapping.
 
 The current scalar implementation intentionally uses a different normalization
 contract:

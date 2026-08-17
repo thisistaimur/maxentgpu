@@ -36,6 +36,10 @@ write_fixture <- function(regmult, prefix = "") {
                               entropy = unname(fit$entropy),
                               n_background = nrow(background)),
                    file.path(output_dir, paste0(prefix, "scales.csv")), row.names = FALSE)
+  penalty <- data.frame(feature = names(fit$penalty.factor),
+                        penalty_factor = unname(fit$penalty.factor))
+  utils::write.csv(penalty, file.path(output_dir, paste0(prefix, "penalty_factors.csv")),
+                   row.names = FALSE)
 }
 write_fixture(regmult = 1)
 # glmnet rejects an exactly zero penalty; this is the smallest positive value
@@ -61,7 +65,9 @@ hash_files <- c(hash_files,
   file.path(output_dir, "weakly_regularized_coefficients.csv"),
   file.path(output_dir, "weakly_regularized_predictions.csv"),
   file.path(output_dir, "scales.csv"),
-  file.path(output_dir, "weakly_regularized_scales.csv")
+  file.path(output_dir, "weakly_regularized_scales.csv"),
+  file.path(output_dir, "penalty_factors.csv"),
+  file.path(output_dir, "weakly_regularized_penalty_factors.csv")
 )
 hashes <- tools::md5sum(hash_files)
 relative_names <- substring(normalizePath(hash_files), nchar(root) + 2L)
