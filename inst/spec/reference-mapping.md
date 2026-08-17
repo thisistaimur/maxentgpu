@@ -64,7 +64,10 @@ specification.
 - **REF-AUTO-001:** verify whether Java 3.4.4 matches the confirmed `maxnet` boundaries and
   excludes threshold features by default under every relevant CLI mode.
 - **REF-REG-001:** map reference feature-specific beta multipliers and sample-size
-  adjustments onto explicit `lambda * r_k` values.
+  adjustments onto explicit `lambda * r_k` values. The pinned maxnet LQ fixture uses
+  factors `0.0389711432` (L) and `0.0566423814` (Q); direct use with package
+  `lambda1 = 1` collapses the package fit to zero coefficients, confirming a scale
+  mismatch that remains unresolved.
 - **REF-SCALE-001:** confirm on Java 3.4.4 the entropy and raw-output mapping already
   established algebraically and executably for `maxnet` 0.1.4.
 - **REF-WEIGHT-001:** determine which presence/background weighting operations are

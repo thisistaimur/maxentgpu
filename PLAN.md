@@ -475,6 +475,22 @@ Acceptance criteria:
 but predictions agree, document identifiability/scaling; if predictions differ, stop
 and resolve the mathematical cause.
 
+#### Gate 1 paper record — reference regularization mapping
+
+The pinned `maxnet` LQ fixture uses `regmult = 1` and feature penalty factors
+`0.0389711432` for linear terms and `0.0566423814` for quadratic terms. Applying
+those factors directly to the package objective with `lambda1 = regmult` and no L2
+penalty converges in one iteration to an all-zero coefficient vector. This is
+evidence that glmnet/maxnet and the package's independently normalized
+presence-background objective use different penalty scales; it is not evidence that
+the model classes are incompatible.
+
+The comparison harness records this as an unresolved `REF-REG-001` mapping. The
+paper must report the objective normalization, penalty convention, conversion method,
+fixture versions, and any residual coefficient/prediction differences. Until a
+conversion is derived and validated on independent L/LQ fixtures, do not describe
+the package as maxnet-compatible and do not use the direct factors as defaults.
+
 ### Phase 2 — Complete MaxEnt feature fidelity
 
 **Goal:** support the required feature classes without duplicating training and
