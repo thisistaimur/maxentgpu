@@ -189,3 +189,30 @@ maxent_feature_spec <- function(object) {
   if (!inherits(object, "maxent_fit")) stop("object is not a maxent_fit model.", call. = FALSE)
   object$feature_spec
 }
+
+#' Apply a feature specification in bounded row chunks
+#'
+#' @param spec A `maxent_feature_spec` object.
+#' @param newdata Numeric or categorical predictor data accepted by `spec`.
+#' @param chunk_size Optional positive number of rows per chunk.
+#' @return A numeric feature matrix.
+#' @export
+maxent_feature_matrix <- function(spec, newdata, chunk_size = NULL) {
+  if (!inherits(spec, "maxent_feature_spec")) stop("invalid feature specification.", call. = FALSE)
+  if (is.null(chunk_size)) {
+    result <- apply_feature_spec(spec, newdata)
+    rownames(result) <- NULL
+    return(result)
+  }
+  chunk_size <- as.integer(chunk_size)
+  if (length(chunk_size) != 1L || is.na(chunk_size) || chunk_size < 1L) {
+    stop("chunk_size must be a positive integer.", call. = FALSE)
+  }
+  rows <- seq_len(nrow(newdata))
+  pieces <- lapply(split(rows, ceiling(rows / chunk_size)), function(index) {
+    apply_feature_spec(spec, newdata[index, , drop = FALSE])
+  })
+  result <- do.call(rbind, pieces)
+  rownames(result) <- NULL
+  result
+}

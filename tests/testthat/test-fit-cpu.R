@@ -54,6 +54,17 @@ test_that("auto feature policy has documented sample-size boundaries", {
   expect_error(maxent_auto_features(0), "positive")
 })
 
+test_that("chunked feature application equals whole-matrix application", {
+  x <- data.frame(x1 = c(0, 1, 2, 3, 4), x2 = c(1, 2, 4, 1, 3))
+  spec <- maxentgpu:::new_feature_spec(x, classes = c("linear", "quadratic", "product"))
+  whole <- maxent_feature_matrix(spec, x)
+  chunked <- maxent_feature_matrix(spec, x, chunk_size = 2)
+  expect_equal(chunked, whole)
+  permutation <- c(5, 2, 4, 1, 3)
+  expect_equal(maxent_feature_matrix(spec, x[permutation, ]), whole[permutation, ])
+  expect_error(maxent_feature_matrix(spec, x, chunk_size = 0), "positive")
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
