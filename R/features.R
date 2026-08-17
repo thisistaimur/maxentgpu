@@ -3,8 +3,9 @@ normalize_feature_classes <- function(classes) {
   classes[classes %in% c("l", "linear")] <- "linear"
   classes[classes %in% c("q", "quadratic")] <- "quadratic"
   classes[classes %in% c("p", "product", "pairwise")] <- "product"
-  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product"))) {
-    stop("features must contain only 'linear', 'quadratic', and/or 'product'.", call. = FALSE)
+  classes[classes %in% c("t", "threshold", "thresholds")] <- "threshold"
+  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product", "threshold"))) {
+    stop("features must contain only 'linear', 'quadratic', 'product', and/or 'threshold'.", call. = FALSE)
   }
   unique(classes)
 }
@@ -27,20 +28,40 @@ validate_numeric_table <- function(x, name) {
   x
 }
 
-new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE) {
+new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE,
+                             thresholds = NULL) {
   x <- validate_numeric_table(x, "presence/background predictors")
   classes <- normalize_feature_classes(classes)
   ranges <- rbind(min = apply(x, 2L, min), max = apply(x, 2L, max))
   if (any(ranges["min", ] == ranges["max", ])) {
     stop("constant predictors are not supported.", call. = FALSE)
   }
+  threshold_values <- lapply(seq_len(ncol(x)), function(index) {
+    value <- if (is.null(thresholds)) NULL else thresholds[[colnames(x)[index]]]
+    if (is.null(value)) {
+      unique_values <- sort(unique(x[, index]))
+      value <- if (length(unique_values) > 1L) (head(unique_values, -1L) + tail(unique_values, -1L)) / 2 else numeric()
+    }
+    value <- sort(unique(as.numeric(value)))
+    if (any(!is.finite(value)) || any(value <= ranges["min", index]) || any(value >= ranges["max", index])) {
+      stop("thresholds must be finite and strictly inside predictor ranges.", call. = FALSE)
+    }
+    value
+  })
+  names(threshold_values) <- colnames(x)
+  if ("threshold" %in% classes && !any(lengths(threshold_values))) {
+    stop("threshold features require at least one threshold.", call. = FALSE)
+  }
   columns <- unlist(lapply(classes, function(class) {
     if (class == "linear") paste0("L:", colnames(x))
     else if (class == "quadratic") paste0("Q:", colnames(x))
-    else if (ncol(x) < 2L) stop("product features require at least two predictors.", call. = FALSE)
-    else {
+    else if (class == "product" && ncol(x) < 2L) stop("product features require at least two predictors.", call. = FALSE)
+    else if (class == "product") {
       pairs <- utils::combn(colnames(x), 2L)
       paste0("P:", pairs[1L, ], "*", pairs[2L, ])
+    } else {
+      unlist(Map(function(name, values) paste0("T:", name, "<=", format(values, trim = TRUE, scientific = FALSE)),
+                 names(threshold_values), threshold_values), use.names = FALSE)
     }
   }), use.names = FALSE)
   structure(list(
@@ -48,6 +69,7 @@ new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE
     predictors = colnames(x),
     classes = classes,
     ranges = ranges,
+    thresholds = threshold_values,
     columns = columns,
     clamp = isTRUE(clamp),
     penalty_l1 = rep(1, length(columns)),
@@ -72,10 +94,16 @@ apply_feature_spec <- function(spec, newdata, clamp = spec$clamp) {
     } else if (class == "quadratic") {
       out[[length(out) + 1L]] <- x^2
     } else {
-      pairs <- utils::combn(seq_len(ncol(x)), 2L)
-      out[[length(out) + 1L]] <- vapply(seq_len(ncol(pairs)), function(pair) {
-        x[, pairs[1L, pair]] * x[, pairs[2L, pair]]
-      }, numeric(nrow(x)))
+      if (class == "product") {
+        pairs <- utils::combn(seq_len(ncol(x)), 2L)
+        out[[length(out) + 1L]] <- vapply(seq_len(ncol(pairs)), function(pair) {
+          x[, pairs[1L, pair]] * x[, pairs[2L, pair]]
+        }, numeric(nrow(x)))
+      } else {
+        out[[length(out) + 1L]] <- do.call(cbind, Map(function(name, values) {
+          outer(x[, name], values, FUN = "<=") * 1
+        }, names(spec$thresholds), spec$thresholds))
+      }
     }
   }
   result <- do.call(cbind, out)

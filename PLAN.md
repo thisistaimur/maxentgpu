@@ -515,7 +515,7 @@ prediction logic.
 Tasks:
 
 - [x] Implement product features with deterministic naming/order.
-- [ ] Implement threshold features and stored thresholds.
+- [x] Implement threshold features and stored thresholds.
 - [ ] Implement forward/reverse hinge features and stored knots.
 - [ ] Implement categorical levels/contrasts and unseen-level policy.
 - [ ] Implement auto-feature policy with boundary tests.

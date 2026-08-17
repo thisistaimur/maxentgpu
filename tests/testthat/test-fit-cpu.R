@@ -13,6 +13,16 @@ test_that("product features have deterministic pair ordering", {
   expect_equal(unname(apply_feature_spec(spec, x)[1, ]), c(0, 0, 2))
 })
 
+test_that("threshold features store knots and apply deterministic indicators", {
+  x <- data.frame(x1 = c(0, 1, 2, 3, 4), x2 = c(1, 2, 4, 1, 3))
+  fit <- maxent_fit(x, c(TRUE, TRUE, TRUE, FALSE, FALSE), features = "threshold",
+                    thresholds = list(x1 = c(1.5, 2.5), x2 = 2.5))
+  spec <- maxent_feature_spec(fit)
+  expect_identical(spec$columns, c("T:x1<=1.5", "T:x1<=2.5", "T:x2<=2.5"))
+  expect_equal(unname(apply_feature_spec(spec, x)[1, ]), c(1, 1, 1))
+  expect_equal(spec$thresholds$x1, c(1.5, 2.5))
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",

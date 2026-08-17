@@ -50,7 +50,9 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
 #' @param background Optional numeric background predictor table.
 #' @param presence_weights Optional positive presence weights.
 #' @param background_weights Optional positive background weights.
-#' @param features Feature classes: `"linear"`, `"quadratic"`, `"product"`, or combinations.
+#' @param features Feature classes: `"linear"`, `"quadratic"`, `"product"`,
+#'   `"threshold"`, or combinations.
+#' @param thresholds Optional named list of numeric threshold values by predictor.
 #' @param regularization A list with non-negative `lambda1` and `lambda2`, and
 #'   optional feature-specific non-negative `penalty_l1` and `penalty_l2` vectors.
 #' @param control A list with `max_iter`, `tol`, and `step`.
@@ -59,6 +61,7 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
 maxent_fit <- function(x, presence, background = NULL,
                        presence_weights = NULL, background_weights = NULL,
                        features = c("linear", "quadratic"),
+                       thresholds = NULL,
                        regularization = list(lambda1 = 0, lambda2 = 1),
                        control = list(max_iter = 2000L, tol = 1e-8, step = 1)) {
   if (is.null(background)) {
@@ -77,7 +80,7 @@ maxent_fit <- function(x, presence, background = NULL,
   }
   if (!nrow(presence_x) || !nrow(background_x)) stop("presence and background must both be non-empty.", call. = FALSE)
   classes <- normalize_feature_classes(features)
-  spec <- new_feature_spec(rbind(presence_x, background_x), classes)
+  spec <- new_feature_spec(rbind(presence_x, background_x), classes, thresholds = thresholds)
   presence_phi <- apply_feature_spec(spec, presence_x)
   background_phi <- apply_feature_spec(spec, background_x)
   design_rank <- qr(rbind(presence_phi, background_phi), tol = 1e-10)$rank
