@@ -9,8 +9,14 @@ maxnet_dir <- file.path(root, "tests", "fixtures", "maxnet")
 maxnet_files <- file.path(maxnet_dir, c(
   "coefficients.csv", "predictions.csv", "formula.txt", "provenance.dcf",
   "weakly_regularized_coefficients.csv", "weakly_regularized_predictions.csv",
-  "scales.csv", "weakly_regularized_scales.csv", "checksums.md5"
-  , "penalty_factors.csv", "weakly_regularized_penalty_factors.csv"
+  "scales.csv", "weakly_regularized_scales.csv", "checksums.md5",
+  "penalty_factors.csv", "weakly_regularized_penalty_factors.csv",
+  "linear_formula.txt", "linear_coefficients.csv", "linear_predictions.csv",
+  "linear_scales.csv", "linear_penalty_factors.csv",
+  "linear_weakly_regularized_coefficients.csv",
+  "linear_weakly_regularized_predictions.csv",
+  "linear_weakly_regularized_scales.csv",
+  "linear_weakly_regularized_penalty_factors.csv"
 ))
 invisible(lapply(maxnet_files, stop_if_missing))
 

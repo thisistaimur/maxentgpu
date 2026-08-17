@@ -498,6 +498,8 @@ An exploratory package-side sweep on the same fixture produces low affine link R
 near `lambda1 = 0.04`, but that value is fixture-specific and must not become a
 default or a compatibility claim. Re-run `tools/calibrate-reference-regularization.R`
 on independent fixtures before using any conversion in paper results.
+The reference generator now also emits matched linear-only and weakly regularized
+linear fixtures; these are the first independent feature-class check for that sweep.
 
 ### Phase 2 — Complete MaxEnt feature fidelity
 

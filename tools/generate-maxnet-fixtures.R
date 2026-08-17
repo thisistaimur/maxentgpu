@@ -17,8 +17,9 @@ samples <- utils::read.csv(file.path(input_dir, "samples.csv"))
 x <- rbind(background[c("x1", "x2")], samples[c("x1", "x2")])
 p <- c(rep(FALSE, nrow(background)), rep(TRUE, nrow(samples)))
 formula <- maxnet::maxnet.formula(p, x, classes = "lq")
-write_fixture <- function(regmult, prefix = "") {
-  fit <- maxnet::maxnet(p, x, f = formula, regmult = regmult)
+linear_formula <- maxnet::maxnet.formula(p, x, classes = "l")
+write_fixture <- function(regmult, prefix = "", model_formula = formula) {
+  fit <- maxnet::maxnet(p, x, f = model_formula, regmult = regmult)
   coefficient <- data.frame(feature = names(fit$betas),
                             coefficient = unname(fit$betas))
   utils::write.csv(coefficient, file.path(output_dir, paste0(prefix, "coefficients.csv")),
@@ -47,7 +48,10 @@ write_fixture(regmult = 1)
 # glmnet rejects an exactly zero penalty; this is the smallest positive value
 # accepted by maxnet and is used as a near-unregularized diagnostic target.
 write_fixture(regmult = 1e-8, prefix = "weakly_regularized_")
+write_fixture(regmult = 1, prefix = "linear_", model_formula = linear_formula)
+write_fixture(regmult = 1e-8, prefix = "linear_weakly_regularized_", model_formula = linear_formula)
 writeLines(deparse(formula), file.path(output_dir, "formula.txt"))
+writeLines(deparse(linear_formula), file.path(output_dir, "linear_formula.txt"))
 write.dcf(data.frame(
   Generator = "tools/generate-maxnet-fixtures.R",
   MaxnetVersion = actual_version,
@@ -69,7 +73,16 @@ hash_files <- c(hash_files,
   file.path(output_dir, "scales.csv"),
   file.path(output_dir, "weakly_regularized_scales.csv"),
   file.path(output_dir, "penalty_factors.csv"),
-  file.path(output_dir, "weakly_regularized_penalty_factors.csv")
+  file.path(output_dir, "weakly_regularized_penalty_factors.csv"),
+  file.path(output_dir, "linear_formula.txt"),
+  file.path(output_dir, "linear_coefficients.csv"),
+  file.path(output_dir, "linear_predictions.csv"),
+  file.path(output_dir, "linear_scales.csv"),
+  file.path(output_dir, "linear_penalty_factors.csv"),
+  file.path(output_dir, "linear_weakly_regularized_coefficients.csv"),
+  file.path(output_dir, "linear_weakly_regularized_predictions.csv"),
+  file.path(output_dir, "linear_weakly_regularized_scales.csv"),
+  file.path(output_dir, "linear_weakly_regularized_penalty_factors.csv")
 )
 hashes <- tools::md5sum(hash_files)
 relative_names <- substring(normalizePath(hash_files), nchar(root) + 2L)
