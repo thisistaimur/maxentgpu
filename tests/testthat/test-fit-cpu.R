@@ -233,3 +233,16 @@ test_that("package Torch objective oracle agrees with analytic objective", {
   expect_equal(oracle$value, analytic$value, tolerance = 1e-7)
   expect_equal(oracle$gradient, analytic$gradient, tolerance = 1e-7)
 })
+
+test_that("Torch solver engine matches the analytic CPU engine", {
+  skip_if_not_installed("torch")
+  x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
+  analytic <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
+                          control = list(max_iter = 500L, tol = 1e-8, engine = "analytic"))
+  torch_fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
+                          control = list(max_iter = 500L, tol = 1e-8, engine = "torch"))
+  torch_raw <- predict(torch_fit, x, type = "raw")
+  analytic_raw <- predict(analytic, x, type = "raw")
+  expect_lt(max(abs((torch_raw - analytic_raw) / analytic_raw)), 1e-4)
+  expect_identical(maxent_diagnostics(torch_fit)$engine, "torch")
+})

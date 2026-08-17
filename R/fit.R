@@ -29,7 +29,14 @@ normalize_execution <- function(control) {
   if (device == "auto") device <- "cpu"
   if (device != "cpu") stop("accelerator fitting is not implemented yet; use device = 'cpu'.", call. = FALSE)
   if (dtype != "float64") stop("CPU fitting currently requires dtype = 'float64'.", call. = FALSE)
-  list(device = device, dtype = dtype)
+  engine <- tolower(as.character(control$engine %||% "analytic"))
+  if (length(engine) != 1L || !engine %in% c("analytic", "torch")) {
+    stop("control engine must be 'analytic' or 'torch'.", call. = FALSE)
+  }
+  if (engine == "torch" && !requireNamespace("torch", quietly = TRUE)) {
+    stop("control engine = 'torch' requires the torch package.", call. = FALSE)
+  }
+  list(device = device, dtype = dtype, engine = engine)
 }
 
 stable_logz <- function(z, weights) {
@@ -90,8 +97,8 @@ torch_objective_components <- function(beta, presence_phi, background_phi, w, q,
 #' @param knots Optional named list of numeric hinge knots by predictor.
 #' @param regularization A list with non-negative `lambda1` and `lambda2`, and
 #'   optional feature-specific non-negative `penalty_l1` and `penalty_l2` vectors.
-#' @param control A list with `max_iter`, `tol`, `step`, optional `device` and
-#'   `dtype`, and `accelerated`.
+#' @param control A list with `max_iter`, `tol`, `step`, optional `device`,
+#'   `dtype`, `engine` (`"analytic"` or `"torch"`), and `accelerated`.
 #' @return An object of class `maxent_fit`.
 #' @export
 maxent_fit <- function(x, presence, background = NULL,
@@ -151,8 +158,17 @@ maxent_fit <- function(x, presence, background = NULL,
   max_iter <- as.integer(control$max_iter %||% 2000L)
   tol <- as.numeric(control$tol %||% 1e-8)
   step <- as.numeric(control$step %||% 1)
-  accelerated <- isTRUE(control$accelerated %||% TRUE)
   execution <- normalize_execution(control)
+  accelerated <- isTRUE(control$accelerated %||% TRUE)
+  objective_eval <- if (execution$engine == "torch") {
+    function(beta_value, ...) {
+      result <- torch_objective_components(beta = beta_value, ...)
+      analytic <- objective_components(beta = beta_value, ...)
+      analytic[c("smooth", "logz", "pi", "gradient")] <- NULL
+      list(value = result$value, gradient = result$gradient,
+           smooth = NA_real_, logz = NA_real_, pi = NULL)
+    }
+  } else objective_components
   if (max_iter < 1L || !is.finite(tol) || tol <= 0 || !is.finite(step) || step <= 0) stop("invalid solver control values.", call. = FALSE)
   beta <- numeric(ncol(presence_phi))
   y <- beta
@@ -163,25 +179,25 @@ maxent_fit <- function(x, presence, background = NULL,
   parameter_change <- Inf
   smooth_gradient_norm <- Inf
   for (iteration in seq_len(max_iter)) {
-    baseline <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+    baseline <- objective_eval(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     values[iteration] <- baseline$value
-    current <- objective_components(y, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+    current <- objective_eval(y, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     candidate <- y - step * current$gradient
     candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
-    trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+    trial <- objective_eval(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     if (trial$value > baseline$value && accelerated) {
       y <- beta
       momentum <- 1
       current <- baseline
       candidate <- beta - step * current$gradient
       candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
-      trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+      trial <- objective_eval(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     }
     while (trial$value > baseline$value && step > 1e-12) {
       step <- step / 2
       candidate <- y - step * current$gradient
       candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
-      trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+      trial <- objective_eval(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     }
     if (max(abs(candidate - beta)) <= tol) {
       parameter_change <- max(abs(candidate - beta))
@@ -219,7 +235,8 @@ maxent_fit <- function(x, presence, background = NULL,
                                     parameter_change = parameter_change,
                                     smooth_gradient_norm = smooth_gradient_norm,
                                     stop_reason = stop_reason,
-                                    device = execution$device, dtype = execution$dtype)),
+                                    device = execution$device, dtype = execution$dtype,
+                                    engine = execution$engine)),
             class = "maxent_fit")
 }
 
