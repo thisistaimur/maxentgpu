@@ -25,6 +25,8 @@ test_that("pinned reference fixtures are readable and finite", {
   expect_true(all(is.finite(penalties$penalty_factor) & penalties$penalty_factor > 0))
   expect_true(nrow(java) >= 1L)
   expect_true(all(is.finite(java$`Regularized training gain`)))
+  java_provenance <- read.dcf(test_path("..", "fixtures", "java-maxent", "provenance.dcf"))
+  expect_identical(as.character(java_provenance[1, "FeatureClasses"]), "linear (observed lambda basis)")
 })
 
 test_that("package-native LQ fit aligns with reference fixture rows", {

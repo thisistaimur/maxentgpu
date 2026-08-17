@@ -56,6 +56,7 @@ write.dcf(data.frame(
   Generator = "tools/generate-java-maxent-fixtures.R",
   MaxEntVersion = row$version,
   JarSHA256 = actual_sha256,
+  FeatureClasses = "linear (observed lambda basis)",
   JavaVersion = paste(system2("java", "-version", stdout = TRUE,
                               stderr = TRUE), collapse = " | "),
   Command = paste(

@@ -79,6 +79,7 @@ if (!identical(java$sha256[[1]], "REPLACE_AFTER_LICENSED_ACQUISITION")) {
   }
   java_provenance <- read.dcf(file.path(java_dir, "provenance.dcf"))
   if (!identical(as.character(java_provenance[1, "MaxEntVersion"]), "3.4.4") ||
+      !identical(as.character(java_provenance[1, "FeatureClasses"]), "linear (observed lambda basis)") ||
       !identical(as.character(java_provenance[1, "JarSHA256"]),
                  as.character(java$sha256[[1]]))) {
     stop("Java MaxEnt provenance does not match the pinned manifest.")
