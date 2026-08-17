@@ -219,3 +219,17 @@ test_that("Torch autograd agrees with the stable analytic gradient", {
   loss$backward()
   expect_equal(as.numeric(beta_t$grad), analytic, tolerance = 1e-7)
 })
+
+test_that("package Torch objective oracle agrees with analytic objective", {
+  skip_if_not_installed("torch")
+  presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
+  background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)
+  beta <- c(0.15, -0.2)
+  args <- list(beta = beta, presence_phi = presence_phi, background_phi = background_phi,
+               w = c(0.25, 0.75), q = c(0.2, 0.3, 0.5), lambda1 = 0,
+               lambda2 = 0.4, r1 = c(1, 1), r2 = c(1, 1))
+  analytic <- do.call(maxentgpu:::objective_components, args)
+  oracle <- do.call(maxentgpu:::torch_objective_components, args)
+  expect_equal(oracle$value, analytic$value, tolerance = 1e-7)
+  expect_equal(oracle$gradient, analytic$gradient, tolerance = 1e-7)
+})

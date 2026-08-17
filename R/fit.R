@@ -56,6 +56,25 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
        gradient = gradient, pi = pi)
 }
 
+torch_objective_components <- function(beta, presence_phi, background_phi, w, q, lambda1, lambda2, r1, r2) {
+  if (!requireNamespace("torch", quietly = TRUE)) stop("torch is required for the autograd oracle.", call. = FALSE)
+  dtype <- torch::torch_float64()
+  beta_t <- torch::torch_tensor(beta, dtype = dtype, requires_grad = TRUE)
+  presence_t <- torch::torch_tensor(presence_phi, dtype = dtype)
+  background_t <- torch::torch_tensor(background_phi, dtype = dtype)
+  w_t <- torch::torch_tensor(w, dtype = dtype)
+  q_t <- torch::torch_tensor(q, dtype = dtype)
+  z_presence <- presence_t$matmul(beta_t)
+  z_background <- background_t$matmul(beta_t)
+  logz <- torch::torch_logsumexp(torch::torch_log(q_t) + z_background, dim = 1)
+  smooth <- logz - (w_t * z_presence)$sum()
+  penalty <- lambda1 * (torch::torch_tensor(r1, dtype = dtype) * torch::torch_abs(beta_t))$sum() +
+    0.5 * lambda2 * (torch::torch_tensor(r2, dtype = dtype) * beta_t^2)$sum()
+  value <- smooth + penalty
+  value$backward()
+  list(value = as.numeric(value$item()), gradient = as.numeric(beta_t$grad))
+}
+
 #' Fit a scalar CPU maximum-entropy model
 #'
 #' @param x Numeric presence predictors when `background` is supplied, or a
