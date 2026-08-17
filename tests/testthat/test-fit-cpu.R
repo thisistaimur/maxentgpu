@@ -65,6 +65,23 @@ test_that("chunked feature application equals whole-matrix application", {
   expect_error(maxent_feature_matrix(spec, x, chunk_size = 0), "positive")
 })
 
+test_that("feature properties guard duplicates, missing values, extremes, and level order", {
+  x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 4, 1))
+  threshold_spec <- maxentgpu:::new_feature_spec(x, classes = "threshold",
+                                                  thresholds = list(x1 = c(1.5, 1.5), x2 = 2))
+  expect_identical(threshold_spec$columns, c("T:x1<=1.5", "T:x2<=2"))
+  hinge_spec <- maxentgpu:::new_feature_spec(x, classes = "hinge",
+                                             knots = list(x1 = c(1.5, 1.5), x2 = 2))
+  expect_identical(hinge_spec$columns, c("H+:x1>1.5", "H-:x1<1.5", "H+:x2>2", "H-:x2<2"))
+  expect_error(maxentgpu:::apply_feature_spec(hinge_spec,
+                                              data.frame(x1 = NA_real_, x2 = 2)), "non-finite")
+  extreme <- maxentgpu:::new_feature_spec(data.frame(x = c(-1e200, 1e200)), classes = "quadratic")
+  expect_error(maxentgpu:::apply_feature_spec(extreme, data.frame(x = c(-1e200, 1e200))), "non-finite")
+  categorical <- maxentgpu:::new_feature_spec(
+    data.frame(group = factor(c("b", "a"), levels = c("b", "a"))), classes = "categorical")
+  expect_identical(categorical$columns, c("C:group=a", "C:group=b"))
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",

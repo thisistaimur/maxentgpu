@@ -176,6 +176,7 @@ apply_feature_spec <- function(spec, newdata, clamp = spec$clamp) {
     }
   }
   result <- do.call(cbind, out)
+  if (any(!is.finite(result))) stop("feature transform produced non-finite values.", call. = FALSE)
   colnames(result) <- spec$columns
   result
 }

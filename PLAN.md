@@ -522,7 +522,7 @@ Tasks:
 - [ ] Implement feature-specific regularization and expose an auditable coefficient
   table containing class, source predictors, knot/level, scale, and penalty.
 - [x] Test feature application in chunks and whole-matrix mode for identity.
-- [ ] Add property tests for permutations, constant columns, duplicated knots, extreme
+- [x] Add property tests for permutations, constant columns, duplicated knots, extreme
   ranges, missing values, and categorical level order.
 - [ ] Expand `maxnet` and Java reference fixtures one feature class at a time, then in
   supported combinations.
