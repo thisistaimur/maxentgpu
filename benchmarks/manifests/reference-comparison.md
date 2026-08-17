@@ -11,6 +11,8 @@ background count in `tests/fixtures/maxnet/*scales.csv`; comparisons can therefo
 remove the reference intercept explicitly instead of estimating it implicitly.
 The corresponding `*penalty_factors.csv` files preserve maxnet's feature-specific
 glmnet penalty factors for the regularization mapping.
+The fixture set now includes an `lqph_` target covering linear, quadratic, product,
+and hinge construction. Categorical and Java feature mappings remain separate.
 Applying those factors directly with `lambda1 = regmult` in the package is an
 executable diagnostic, not yet a matched objective: the two solvers normalize the
 presence/background loss and penalty scale differently. The comparison command

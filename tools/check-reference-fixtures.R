@@ -16,7 +16,9 @@ maxnet_files <- file.path(maxnet_dir, c(
   "linear_weakly_regularized_coefficients.csv",
   "linear_weakly_regularized_predictions.csv",
   "linear_weakly_regularized_scales.csv",
-  "linear_weakly_regularized_penalty_factors.csv"
+  "linear_weakly_regularized_penalty_factors.csv",
+  "lqph_formula.txt", "lqph_coefficients.csv", "lqph_predictions.csv",
+  "lqph_scales.csv", "lqph_penalty_factors.csv"
 ))
 invisible(lapply(maxnet_files, stop_if_missing))
 

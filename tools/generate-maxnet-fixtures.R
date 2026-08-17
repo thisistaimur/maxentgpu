@@ -18,6 +18,7 @@ x <- rbind(background[c("x1", "x2")], samples[c("x1", "x2")])
 p <- c(rep(FALSE, nrow(background)), rep(TRUE, nrow(samples)))
 formula <- maxnet::maxnet.formula(p, x, classes = "lq")
 linear_formula <- maxnet::maxnet.formula(p, x, classes = "l")
+lqph_formula <- maxnet::maxnet.formula(p, x, classes = "lqph")
 write_fixture <- function(regmult, prefix = "", model_formula = formula) {
   fit <- maxnet::maxnet(p, x, f = model_formula, regmult = regmult)
   coefficient <- data.frame(feature = names(fit$betas),
@@ -50,8 +51,10 @@ write_fixture(regmult = 1)
 write_fixture(regmult = 1e-8, prefix = "weakly_regularized_")
 write_fixture(regmult = 1, prefix = "linear_", model_formula = linear_formula)
 write_fixture(regmult = 1e-8, prefix = "linear_weakly_regularized_", model_formula = linear_formula)
+write_fixture(regmult = 1, prefix = "lqph_", model_formula = lqph_formula)
 writeLines(deparse(formula), file.path(output_dir, "formula.txt"))
 writeLines(deparse(linear_formula), file.path(output_dir, "linear_formula.txt"))
+writeLines(deparse(lqph_formula), file.path(output_dir, "lqph_formula.txt"))
 write.dcf(data.frame(
   Generator = "tools/generate-maxnet-fixtures.R",
   MaxnetVersion = actual_version,
@@ -83,6 +86,11 @@ hash_files <- c(hash_files,
   file.path(output_dir, "linear_weakly_regularized_predictions.csv"),
   file.path(output_dir, "linear_weakly_regularized_scales.csv"),
   file.path(output_dir, "linear_weakly_regularized_penalty_factors.csv")
+  , file.path(output_dir, "lqph_formula.txt")
+  , file.path(output_dir, "lqph_coefficients.csv")
+  , file.path(output_dir, "lqph_predictions.csv")
+  , file.path(output_dir, "lqph_scales.csv")
+  , file.path(output_dir, "lqph_penalty_factors.csv")
 )
 hashes <- tools::md5sum(hash_files)
 relative_names <- substring(normalizePath(hash_files), nchar(root) + 2L)

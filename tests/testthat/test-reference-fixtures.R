@@ -2,6 +2,7 @@ test_that("pinned reference fixtures are readable and finite", {
   maxnet <- read.csv(test_path("..", "fixtures", "maxnet", "predictions.csv"))
   maxnet_weakly_regularized <- read.csv(test_path("..", "fixtures", "maxnet", "weakly_regularized_predictions.csv"))
   maxnet_linear <- read.csv(test_path("..", "fixtures", "maxnet", "linear_predictions.csv"))
+  maxnet_lqph <- read.csv(test_path("..", "fixtures", "maxnet", "lqph_predictions.csv"))
   scales <- read.csv(test_path("..", "fixtures", "maxnet", "scales.csv"))
   penalties <- read.csv(test_path("..", "fixtures", "maxnet", "penalty_factors.csv"))
   java <- read.csv(test_path("..", "fixtures", "java-maxent", "maxentResults.csv"),
@@ -12,6 +13,8 @@ test_that("pinned reference fixtures are readable and finite", {
   expect_true(all(is.finite(maxnet_weakly_regularized$link)))
   expect_equal(nrow(maxnet_linear), nrow(maxnet))
   expect_true(all(is.finite(maxnet_linear$link)))
+  expect_equal(nrow(maxnet_lqph), nrow(maxnet))
+  expect_true(all(is.finite(maxnet_lqph$link)))
   expect_equal(scales$n_background, 8L)
   expect_true(is.finite(scales$alpha) && is.finite(scales$entropy))
   expect_lt(abs(scales$glmnet_lambda_min - 0.0004733343), 1e-8)

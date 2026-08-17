@@ -1,0 +1,2 @@
+~x1 + x2 + I(x1^2) + I(x2^2) + hinge(x1) + hinge(x2) + x2:x1 - 
+    1
