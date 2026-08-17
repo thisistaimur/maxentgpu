@@ -52,6 +52,29 @@ write_fixture(regmult = 1e-8, prefix = "weakly_regularized_")
 write_fixture(regmult = 1, prefix = "linear_", model_formula = linear_formula)
 write_fixture(regmult = 1e-8, prefix = "linear_weakly_regularized_", model_formula = linear_formula)
 write_fixture(regmult = 1, prefix = "lqph_", model_formula = lqph_formula)
+
+categorical_x <- data.frame(
+  habitat = factor(c("forest", "grass", "wetland", "forest", "grass", "wetland", "forest", "grass", "wetland")),
+  region = factor(c("north", "south", "east", "south", "north", "east", "east", "north", "south"))
+)
+categorical_p <- c(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
+categorical_formula <- maxnet::maxnet.formula(categorical_p, categorical_x, classes = "c")
+categorical_fit <- maxnet::maxnet(categorical_p, categorical_x, f = categorical_formula, regmult = 1)
+utils::write.csv(data.frame(feature = names(categorical_fit$betas), coefficient = unname(categorical_fit$betas)),
+                 file.path(output_dir, "categorical_coefficients.csv"), row.names = FALSE)
+utils::write.csv(data.frame(row = seq_len(nrow(categorical_x)),
+                            link = as.numeric(stats::predict(categorical_fit, categorical_x, type = "link")),
+                            exponential = as.numeric(stats::predict(categorical_fit, categorical_x, type = "exponential")),
+                            cloglog = as.numeric(stats::predict(categorical_fit, categorical_x, type = "cloglog")),
+                            logistic = as.numeric(stats::predict(categorical_fit, categorical_x, type = "logistic"))),
+                 file.path(output_dir, "categorical_predictions.csv"), row.names = FALSE)
+writeLines(deparse(categorical_formula), file.path(output_dir, "categorical_formula.txt"))
+utils::write.csv(data.frame(feature = names(categorical_fit$penalty.factor),
+                            penalty_factor = unname(categorical_fit$penalty.factor)),
+                 file.path(output_dir, "categorical_penalty_factors.csv"), row.names = FALSE)
+utils::write.csv(data.frame(regmult = 1, alpha = unname(categorical_fit$alpha),
+                            entropy = unname(categorical_fit$entropy), n_background = sum(!categorical_p)),
+                 file.path(output_dir, "categorical_scales.csv"), row.names = FALSE)
 writeLines(deparse(formula), file.path(output_dir, "formula.txt"))
 writeLines(deparse(linear_formula), file.path(output_dir, "linear_formula.txt"))
 writeLines(deparse(lqph_formula), file.path(output_dir, "lqph_formula.txt"))
@@ -91,6 +114,11 @@ hash_files <- c(hash_files,
   , file.path(output_dir, "lqph_predictions.csv")
   , file.path(output_dir, "lqph_scales.csv")
   , file.path(output_dir, "lqph_penalty_factors.csv")
+  , file.path(output_dir, "categorical_formula.txt")
+  , file.path(output_dir, "categorical_coefficients.csv")
+  , file.path(output_dir, "categorical_predictions.csv")
+  , file.path(output_dir, "categorical_scales.csv")
+  , file.path(output_dir, "categorical_penalty_factors.csv")
 )
 hashes <- tools::md5sum(hash_files)
 relative_names <- substring(normalizePath(hash_files), nchar(root) + 2L)

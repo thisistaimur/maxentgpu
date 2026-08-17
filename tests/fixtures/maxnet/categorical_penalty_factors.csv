@@ -1,0 +1,7 @@
+"feature","penalty_factor"
+"categorical(habitat):forest",0.140845660210033
+"categorical(habitat):grass",0.140845660210033
+"categorical(habitat):wetland",0.115
+"categorical(region):east",0.115
+"categorical(region):north",0.140845660210033
+"categorical(region):south",0.140845660210033

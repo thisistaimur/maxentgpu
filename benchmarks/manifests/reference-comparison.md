@@ -13,6 +13,9 @@ The corresponding `*penalty_factors.csv` files preserve maxnet's feature-specifi
 glmnet penalty factors for the regularization mapping.
 The fixture set now includes an `lqph_` target covering linear, quadratic, product,
 and hinge construction. Categorical and Java feature mappings remain separate.
+The fixture set also includes a deterministic categorical target with stored levels
+and one-hot reference predictions; its small-sample glmnet warning is retained as
+fixture provenance rather than treated as a package failure.
 Applying those factors directly with `lambda1 = regmult` in the package is an
 executable diagnostic, not yet a matched objective: the two solvers normalize the
 presence/background loss and penalty scale differently. The comparison command
