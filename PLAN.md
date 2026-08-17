@@ -552,6 +552,8 @@ Tasks:
   device; keep serializable model state device-neutral.
 - [ ] Add CPU/CUDA and CPU/MPS parity tests for feature matrices, objective, gradient,
   fits, predictions, clamping, serialization, and errors.
+- [x] Add backend-conditional Torch objective/gradient and scalar-fit/prediction parity
+  tests; unavailable accelerators skip with an explicit reason.
 - [ ] Test extreme logits and memory errors with actionable messages.
 - [ ] Measure and remove accidental host/device transfers in the iteration loop.
 - [ ] Add synchronization only around benchmark timing and documented transfer points.
