@@ -19,6 +19,12 @@ finite-difference, and serialization tests. A future reference adapter must comp
 equivalent normalized measures and explicitly account for the intercept/entropy
 offset before claiming `maxnet` compatibility.
 
+The command `Rscript tools/compare-reference-fixtures.R .` reports correlations plus
+an affine mapping for the link scale and a multiplicative ratio for the raw scale.
+These are diagnostic quantities only, not acceptance thresholds. A mapping is eligible
+for a compatibility claim only after it is reproduced on independent fixtures and its
+regularization and weighting assumptions are recorded here.
+
 Java MaxEnt 3.4.4 fixtures are now available with the same provenance and checksum
 discipline. Java feature-class, regularization, weighting, clamping, and output-scale
 comparisons remain separate mapping decisions in `inst/spec/reference-mapping.md`.
