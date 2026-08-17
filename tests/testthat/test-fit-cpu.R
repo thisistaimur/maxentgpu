@@ -29,6 +29,28 @@ test_that("monotone FISTA agrees with non-accelerated proximal updates", {
                predict(plain, x, type = "raw"), tolerance = 1e-6)
 })
 
+test_that("model serialization preserves predictions and diagnostics", {
+  x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
+  fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear")
+  path <- tempfile(fileext = ".rds")
+  expect_identical(save_maxent_model(fit, path), path)
+  restored <- read_maxent_model(path)
+  expect_equal(predict(restored, x, type = "raw"), predict(fit, x, type = "raw"))
+  expect_equal(maxent_diagnostics(restored), maxent_diagnostics(fit))
+  expect_equal(summary(restored)$entropy, summary(fit)$entropy)
+})
+
+test_that("invalid training inputs fail explicitly", {
+  expect_error(maxent_fit(data.frame(x = c(1, 2)), c(TRUE, FALSE),
+                          presence_weights = c(1, 0)), "strictly positive")
+  expect_error(maxent_fit(data.frame(x = c(1, 1)), c(TRUE, FALSE)), "constant")
+  expect_error(maxent_fit(data.frame(x = c(1, 2)), c(TRUE, FALSE),
+                          features = "hinge"), "linear.*quadratic")
+  fit <- maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE), features = "linear")
+  expect_error(predict(fit, data.frame(y = 1), type = "raw"), "missing predictors")
+  expect_error(predict(fit, data.frame(x = 1), type = "cloglog"), "should be one of")
+})
+
 test_that("weighted duplicate rows preserve the normalized objective", {
   presence <- data.frame(x1 = c(0, 0, 1))
   background <- data.frame(x1 = c(2, 3, 4))

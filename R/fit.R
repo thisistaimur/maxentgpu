@@ -176,3 +176,46 @@ print.maxent_fit <- function(x, ...) {
       "  converged:", x$diagnostics$converged, "\n")
   invisible(x)
 }
+
+#' Summarize a fitted maximum-entropy model
+#'
+#' @param object A fitted `maxent_fit` object.
+#' @param ... Unused.
+#' @return A compact model summary, invisibly.
+#' @export
+summary.maxent_fit <- function(object, ...) {
+  if (!inherits(object, "maxent_fit")) stop("object is not a maxent_fit model.", call. = FALSE)
+  out <- list(
+    predictors = object$feature_spec$predictors,
+    features = object$feature_spec$columns,
+    coefficients = maxent_coefficients(object),
+    diagnostics = object$diagnostics,
+    entropy = object$entropy
+  )
+  class(out) <- "summary.maxent_fit"
+  out
+}
+
+#' Save a fitted model
+#'
+#' @param object A fitted `maxent_fit` object.
+#' @param file Destination `.rds` path.
+#' @return `file`, invisibly.
+#' @export
+save_maxent_model <- function(object, file) {
+  if (!inherits(object, "maxent_fit")) stop("object is not a maxent_fit model.", call. = FALSE)
+  if (length(file) != 1L || !nzchar(file)) stop("file must be a non-empty path.", call. = FALSE)
+  saveRDS(object, file = file)
+  invisible(file)
+}
+
+#' Load a fitted model
+#'
+#' @param file Path created by `save_maxent_model()`.
+#' @return A fitted `maxent_fit` object.
+#' @export
+read_maxent_model <- function(file) {
+  object <- readRDS(file)
+  if (!inherits(object, "maxent_fit")) stop("file does not contain a maxent_fit model.", call. = FALSE)
+  object
+}

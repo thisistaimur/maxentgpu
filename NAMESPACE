@@ -2,9 +2,12 @@
 
 S3method(predict,maxent_fit)
 S3method(print,maxent_fit)
+S3method(summary,maxent_fit)
 export(maxent_accelerators)
 export(maxent_coefficients)
 export(maxent_device_probe)
 export(maxent_diagnostics)
 export(maxent_feature_spec)
 export(maxent_fit)
+export(read_maxent_model)
+export(save_maxent_model)
