@@ -547,7 +547,7 @@ supported dtypes and operations, with controlled numerical error.
 
 Tasks:
 
-- [ ] Centralize device/dtype movement and forbid scattered literal `cuda` calls.
+- [x] Centralize device/dtype validation and forbid silent accelerator fallback.
 - [ ] Move feature tensors, objective, optimizer state, and prediction to the selected
   device; keep serializable model state device-neutral.
 - [ ] Add CPU/CUDA and CPU/MPS parity tests for feature matrices, objective, gradient,

@@ -132,6 +132,10 @@ test_that("invalid training inputs fail explicitly", {
   expect_error(maxent_fit(data.frame(x1 = c(1, 2, 3), x2 = c(1, 2, 3)),
                           c(TRUE, FALSE, FALSE), features = "linear"),
                "rank-deficient")
+  expect_error(maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE),
+                          control = list(device = "cuda")), "not implemented")
+  expect_error(maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE),
+                          control = list(dtype = "float32")), "requires dtype")
 })
 
 test_that("numeric guards reject invalid partition inputs", {

@@ -17,6 +17,21 @@ normalize_penalty <- function(value, n, name, default = 1) {
   as.numeric(value)
 }
 
+normalize_execution <- function(control) {
+  device <- tolower(as.character(control$device %||% "cpu"))
+  dtype <- tolower(as.character(control$dtype %||% "float64"))
+  if (length(device) != 1L || !device %in% c("auto", "cpu", "cuda", "mps")) {
+    stop("control device must be one of 'auto', 'cpu', 'cuda', or 'mps'.", call. = FALSE)
+  }
+  if (length(dtype) != 1L || !dtype %in% c("float32", "float64")) {
+    stop("control dtype must be 'float32' or 'float64'.", call. = FALSE)
+  }
+  if (device == "auto") device <- "cpu"
+  if (device != "cpu") stop("accelerator fitting is not implemented yet; use device = 'cpu'.", call. = FALSE)
+  if (dtype != "float64") stop("CPU fitting currently requires dtype = 'float64'.", call. = FALSE)
+  list(device = device, dtype = dtype)
+}
+
 stable_logz <- function(z, weights) {
   if (!length(z) || length(weights) != length(z) || any(!is.finite(z)) ||
       any(!is.finite(weights)) || any(weights <= 0)) {
@@ -56,7 +71,8 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
 #' @param knots Optional named list of numeric hinge knots by predictor.
 #' @param regularization A list with non-negative `lambda1` and `lambda2`, and
 #'   optional feature-specific non-negative `penalty_l1` and `penalty_l2` vectors.
-#' @param control A list with `max_iter`, `tol`, and `step`.
+#' @param control A list with `max_iter`, `tol`, `step`, optional `device` and
+#'   `dtype`, and `accelerated`.
 #' @return An object of class `maxent_fit`.
 #' @export
 maxent_fit <- function(x, presence, background = NULL,
@@ -117,6 +133,7 @@ maxent_fit <- function(x, presence, background = NULL,
   tol <- as.numeric(control$tol %||% 1e-8)
   step <- as.numeric(control$step %||% 1)
   accelerated <- isTRUE(control$accelerated %||% TRUE)
+  execution <- normalize_execution(control)
   if (max_iter < 1L || !is.finite(tol) || tol <= 0 || !is.finite(step) || step <= 0) stop("invalid solver control values.", call. = FALSE)
   beta <- numeric(ncol(presence_phi))
   y <- beta
@@ -183,7 +200,7 @@ maxent_fit <- function(x, presence, background = NULL,
                                     parameter_change = parameter_change,
                                     smooth_gradient_norm = smooth_gradient_norm,
                                     stop_reason = stop_reason,
-                                    device = "cpu", dtype = "float64")),
+                                    device = execution$device, dtype = execution$dtype)),
             class = "maxent_fit")
 }
 
