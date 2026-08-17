@@ -518,7 +518,7 @@ Tasks:
 - [x] Implement threshold features and stored thresholds.
 - [x] Implement forward/reverse hinge features and stored knots.
 - [x] Implement categorical levels/contrasts and unseen-level policy.
-- [ ] Implement auto-feature policy with boundary tests.
+- [x] Implement auto-feature policy with boundary tests.
 - [ ] Implement feature-specific regularization and expose an auditable coefficient
   table containing class, source predictors, knot/level, scale, and penalty.
 - [ ] Test feature application in chunks and whole-matrix mode for identity.

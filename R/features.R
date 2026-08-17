@@ -12,6 +12,24 @@ normalize_feature_classes <- function(classes) {
   unique(classes)
 }
 
+select_auto_features <- function(n_presence) {
+  if (length(n_presence) != 1L || !is.finite(n_presence) || n_presence < 1) {
+    stop("n_presence must be a positive finite scalar.", call. = FALSE)
+  }
+  n_presence <- as.integer(n_presence)
+  if (n_presence < 10L) return("linear")
+  if (n_presence < 15L) return(c("linear", "quadratic"))
+  if (n_presence < 80L) return(c("linear", "quadratic", "hinge"))
+  c("linear", "quadratic", "hinge", "product")
+}
+
+#' Select default feature classes by presence sample size
+#'
+#' @param n_presence Number of presence records.
+#' @return Character vector of feature classes.
+#' @export
+maxent_auto_features <- function(n_presence) select_auto_features(n_presence)
+
 validate_numeric_table <- function(x, name) {
   if (is.data.frame(x)) {
     bad <- !vapply(x, is.numeric, logical(1))

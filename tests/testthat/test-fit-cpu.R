@@ -44,6 +44,16 @@ test_that("categorical features store levels and reject unseen values", {
                "unseen levels")
 })
 
+test_that("auto feature policy has documented sample-size boundaries", {
+  expect_identical(maxent_auto_features(9), "linear")
+  expect_identical(maxent_auto_features(10), c("linear", "quadratic"))
+  expect_identical(maxent_auto_features(14), c("linear", "quadratic"))
+  expect_identical(maxent_auto_features(15), c("linear", "quadratic", "hinge"))
+  expect_identical(maxent_auto_features(79), c("linear", "quadratic", "hinge"))
+  expect_identical(maxent_auto_features(80), c("linear", "quadratic", "hinge", "product"))
+  expect_error(maxent_auto_features(0), "positive")
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",

@@ -66,6 +66,10 @@ maxent_fit <- function(x, presence, background = NULL,
                        knots = NULL,
                        regularization = list(lambda1 = 0, lambda2 = 1),
                        control = list(max_iter = 2000L, tol = 1e-8, step = 1)) {
+  if (length(features) == 1L && identical(tolower(features), "auto")) {
+    presence_count <- if (is.null(background)) sum(as.logical(presence)) else nrow(presence)
+    features <- select_auto_features(presence_count)
+  }
   classes <- normalize_feature_classes(features)
   categorical <- identical(classes, "categorical")
   validate_training <- function(value, name) {
