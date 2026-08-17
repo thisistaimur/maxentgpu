@@ -11,6 +11,7 @@ samples <- utils::read.csv(file.path(input_dir, "samples.csv"))
 presence <- samples[c("x1", "x2")]
 background <- background[c("x1", "x2")]
 reference <- utils::read.csv(file.path(fixture_dir, "predictions.csv"))
+scales <- utils::read.csv(file.path(fixture_dir, "scales.csv"))
 
 fit <- maxentgpu::maxent_fit(
   x = presence,
@@ -45,6 +46,17 @@ report[report$comparison == "link_affine_mapping", c("intercept", "slope", "rmse
   unname(stats::coef(link_mapping)[1]), unname(stats::coef(link_mapping)[2]),
   sqrt(mean(stats::residuals(link_mapping)^2))
 )
+reference_link_no_intercept <- reference$link - scales$alpha[[1]]
+link_no_intercept_mapping <- stats::lm(reference_link_no_intercept ~ native$link)
+report <- rbind(report, data.frame(
+  comparison = "link_without_reference_intercept",
+  correlation = stats::cor(native$link, reference_link_no_intercept),
+  package_scale = "canonical link", reference_scale = "maxnet link minus alpha",
+  intercept = unname(stats::coef(link_no_intercept_mapping)[1]),
+  slope = unname(stats::coef(link_no_intercept_mapping)[2]),
+  rmse = sqrt(mean(stats::residuals(link_no_intercept_mapping)^2)),
+  ratio_median = NA_real_, log_rmse = NA_real_
+))
 raw_ratio <- reference$exponential / native$raw
 report[report$comparison == "raw_multiplicative_mapping", c("ratio_median", "log_rmse")] <- c(
   stats::median(raw_ratio), sqrt(mean((log(raw_ratio) - mean(log(raw_ratio)))^2))

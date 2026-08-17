@@ -6,6 +6,9 @@ columns are retained as an external reference, not as package-native golden valu
 The generator also records a `regmult = 1e-8` weakly regularized fixture because
 `maxnet`/glmnet rejects an exactly zero penalty; this is a near-unregularized
 diagnostic target, not an unregularized equivalence claim.
+Each target also stores its fitted `alpha`, entropy, regularization value, and
+background count in `tests/fixtures/maxnet/*scales.csv`; comparisons can therefore
+remove the reference intercept explicitly instead of estimating it implicitly.
 
 The current scalar implementation intentionally uses a different normalization
 contract:

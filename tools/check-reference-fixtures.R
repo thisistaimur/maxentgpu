@@ -8,7 +8,8 @@ stop_if_missing <- function(path) {
 maxnet_dir <- file.path(root, "tests", "fixtures", "maxnet")
 maxnet_files <- file.path(maxnet_dir, c(
   "coefficients.csv", "predictions.csv", "formula.txt", "provenance.dcf",
-  "weakly_regularized_coefficients.csv", "weakly_regularized_predictions.csv", "checksums.md5"
+  "weakly_regularized_coefficients.csv", "weakly_regularized_predictions.csv",
+  "scales.csv", "weakly_regularized_scales.csv", "checksums.md5"
 ))
 invisible(lapply(maxnet_files, stop_if_missing))
 

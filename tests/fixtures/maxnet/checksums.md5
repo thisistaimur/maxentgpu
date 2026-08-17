@@ -7,3 +7,5 @@ d8a37ab7113f231f1f94e7670f49963b tests/fixtures/maxnet/predictions.csv
 15b5728be9e2a2e42f50b4be57ba1efa tests/fixtures/maxnet/provenance.dcf
 5a72b92531654cb6df877932659a60fd tests/fixtures/maxnet/weakly_regularized_coefficients.csv
 20371aa2b4adc5069a52072a44136438 tests/fixtures/maxnet/weakly_regularized_predictions.csv
+e238199dffa475ca52def8ec7da98709 tests/fixtures/maxnet/scales.csv
+159adb2b03da5efd19cd0c3a365a30d3 tests/fixtures/maxnet/weakly_regularized_scales.csv
