@@ -70,6 +70,9 @@ specification.
   mismatch that remains unresolved. maxnet's glmnet path scales the terminal
   regularization value as `mean(reg) * sum(p) / sum(p + 100 * (1 - p))`; for the
   pinned fixture this is `0.0004733343`, which is recorded in `*scales.csv`.
+  Current-source calibration does not yield one shared package-side multiplier:
+  linear and LQ fixtures have different low-error regions. The conversion therefore
+  remains unresolved and fixture-specific tuning is not an advertised behavior.
 - **REF-SCALE-001:** confirm on Java 3.4.4 the entropy and raw-output mapping already
   established algebraically and executably for `maxnet` 0.1.4.
 - **REF-WEIGHT-001:** determine which presence/background weighting operations are

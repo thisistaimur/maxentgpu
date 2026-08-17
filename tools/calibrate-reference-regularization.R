@@ -14,7 +14,7 @@ reference <- utils::read.csv(file.path(fixture_dir, paste0(prefix, "predictions.
 penalties <- utils::read.csv(file.path(fixture_dir, paste0(prefix, "penalty_factors.csv")))$penalty_factor
 newdata <- rbind(background, presence)
 
-lambda_grid <- seq(0.01, 0.20, by = 0.01)
+lambda_grid <- seq(0.10, 3.00, by = 0.10)
 results <- lapply(lambda_grid, function(lambda1) {
   fit <- maxentgpu::maxent_fit(
     x = presence, presence = presence, background = background,

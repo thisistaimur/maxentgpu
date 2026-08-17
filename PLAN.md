@@ -497,7 +497,9 @@ validated as the package-side `lambda1` conversion.
 An earlier exploratory sweep near `lambda1 = 0.13` was produced with a stale
 installed package that did not apply the new feature-specific penalties and is
 invalid evidence. With the current source package, direct mapped factors do not
-converge in the low-lambda range. Re-run `tools/calibrate-reference-regularization.R`
+converge in the low-lambda range. A wider current-source sweep gives different
+fixture-specific optima (about `0.15` for linear and `0.7` or higher for LQ), so no
+single conversion is supported. Re-run `tools/calibrate-reference-regularization.R`
 only after installing the current source, and do not use any candidate as a default
 or compatibility claim until an independent conversion is validated.
 The reference generator now also emits matched linear-only and weakly regularized
