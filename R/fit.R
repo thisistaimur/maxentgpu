@@ -51,7 +51,7 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
 #' @param presence_weights Optional positive presence weights.
 #' @param background_weights Optional positive background weights.
 #' @param features Feature classes: `"linear"`, `"quadratic"`, `"product"`,
-#'   `"threshold"`, `"hinge"`, or combinations.
+#'   `"threshold"`, `"hinge"`, or categorical-only models.
 #' @param thresholds Optional named list of numeric threshold values by predictor.
 #' @param knots Optional named list of numeric hinge knots by predictor.
 #' @param regularization A list with non-negative `lambda1` and `lambda2`, and
@@ -66,28 +66,38 @@ maxent_fit <- function(x, presence, background = NULL,
                        knots = NULL,
                        regularization = list(lambda1 = 0, lambda2 = 1),
                        control = list(max_iter = 2000L, tol = 1e-8, step = 1)) {
+  classes <- normalize_feature_classes(features)
+  categorical <- identical(classes, "categorical")
+  validate_training <- function(value, name) {
+    if (categorical) {
+      if (!is.data.frame(value) || !nrow(value) || any(!vapply(value, function(column) is.factor(column) || is.character(column), logical(1)))) {
+        stop(name, " must be a non-empty data frame of factor or character columns for categorical features.", call. = FALSE)
+      }
+      value
+    } else validate_numeric_table(value, name)
+  }
   if (is.null(background)) {
-    x <- validate_numeric_table(x, "x")
+    x <- validate_training(x, "x")
     if (length(presence) != nrow(x) || !is.logical(presence)) {
       stop("presence must be a logical vector aligned with x when background is NULL.", call. = FALSE)
     }
     presence_x <- x[presence, , drop = FALSE]
     background_x <- x[!presence, , drop = FALSE]
   } else {
-    presence_x <- validate_numeric_table(presence, "presence")
-    background_x <- validate_numeric_table(background, "background")
+    presence_x <- validate_training(presence, "presence")
+    background_x <- validate_training(background, "background")
     if (!identical(colnames(presence_x), colnames(background_x))) {
       stop("presence and background must have identical predictor names and order.", call. = FALSE)
     }
   }
   if (!nrow(presence_x) || !nrow(background_x)) stop("presence and background must both be non-empty.", call. = FALSE)
-  classes <- normalize_feature_classes(features)
-  spec <- new_feature_spec(rbind(presence_x, background_x), classes,
+  combined <- if (categorical) rbind(presence_x, background_x) else rbind(presence_x, background_x)
+  spec <- new_feature_spec(combined, classes,
                            thresholds = thresholds, knots = knots)
   presence_phi <- apply_feature_spec(spec, presence_x)
   background_phi <- apply_feature_spec(spec, background_x)
   design_rank <- qr(rbind(presence_phi, background_phi), tol = 1e-10)$rank
-  if (design_rank < ncol(presence_phi)) {
+  if (!categorical && design_rank < ncol(presence_phi)) {
     stop("feature design matrix is rank-deficient; remove duplicated or collinear features.", call. = FALSE)
   }
   w <- normalize_weights(presence_weights, nrow(presence_phi), "presence_weights")

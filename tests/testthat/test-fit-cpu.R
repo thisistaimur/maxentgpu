@@ -32,6 +32,18 @@ test_that("hinge features store knots and apply forward and reverse bases", {
   expect_equal(spec$knots$x1, 2)
 })
 
+test_that("categorical features store levels and reject unseen values", {
+  x <- data.frame(habitat = c("forest", "grass", "forest", "wetland", "grass", "wetland", "forest", "grass", "wetland"),
+                  region = factor(c("north", "south", "east", "south", "north", "east", "east", "north", "south")))
+  fit <- maxent_fit(x, c(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE), features = "categorical")
+  spec <- maxent_feature_spec(fit)
+  expect_identical(spec$columns, c("C:habitat=forest", "C:habitat=grass", "C:habitat=wetland",
+                                   "C:region=east", "C:region=north", "C:region=south"))
+  expect_equal(rowSums(apply_feature_spec(spec, x)), rep(2, nrow(x)))
+  expect_error(predict(fit, data.frame(habitat = "desert", region = "north"), type = "link"),
+               "unseen levels")
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",

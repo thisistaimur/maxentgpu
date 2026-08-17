@@ -5,8 +5,9 @@ normalize_feature_classes <- function(classes) {
   classes[classes %in% c("p", "product", "pairwise")] <- "product"
   classes[classes %in% c("t", "threshold", "thresholds")] <- "threshold"
   classes[classes %in% c("h", "hinge", "hinges")] <- "hinge"
-  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product", "threshold", "hinge"))) {
-    stop("features must contain only 'linear', 'quadratic', 'product', 'threshold', and/or 'hinge'.", call. = FALSE)
+  classes[classes %in% c("c", "categorical", "factor")] <- "categorical"
+  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product", "threshold", "hinge", "categorical"))) {
+    stop("features must contain only 'linear', 'quadratic', 'product', 'threshold', 'hinge', and/or 'categorical'.", call. = FALSE)
   }
   unique(classes)
 }
@@ -31,6 +32,19 @@ validate_numeric_table <- function(x, name) {
 
 new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE,
                              thresholds = NULL, knots = NULL) {
+  if (identical(classes, "categorical")) {
+    if (!is.data.frame(x) || !nrow(x) || !ncol(x) ||
+        any(!vapply(x, function(column) is.factor(column) || is.character(column), logical(1)))) {
+      stop("categorical features require a non-empty data frame of factor or character columns.", call. = FALSE)
+    }
+    levels <- lapply(x, function(column) sort(unique(as.character(column))))
+    names(levels) <- names(x)
+    columns <- unlist(Map(function(name, values) paste0("C:", name, "=", values), names(levels), levels), use.names = FALSE)
+    return(structure(list(schema = "maxentgpu-features-v1", predictors = names(x),
+                          classes = classes, levels = levels, columns = columns,
+                          clamp = FALSE, penalty_l1 = rep(1, length(columns)),
+                          penalty_l2 = rep(1, length(columns))), class = "maxent_feature_spec"))
+  }
   x <- validate_numeric_table(x, "presence/background predictors")
   classes <- normalize_feature_classes(classes)
   ranges <- rbind(min = apply(x, 2L, min), max = apply(x, 2L, max))
@@ -99,6 +113,18 @@ new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE
 
 apply_feature_spec <- function(spec, newdata, clamp = spec$clamp) {
   if (!inherits(spec, "maxent_feature_spec")) stop("invalid feature specification.", call. = FALSE)
+  if (identical(spec$classes, "categorical")) {
+    if (!is.data.frame(newdata)) stop("newdata must be a data frame for categorical features.", call. = FALSE)
+    missing <- setdiff(spec$predictors, names(newdata))
+    if (length(missing)) stop("newdata is missing predictors: ", paste(missing, collapse = ", "), call. = FALSE)
+    result <- do.call(cbind, Map(function(name, values) {
+      observed <- as.character(newdata[[name]])
+      if (any(!observed %in% values)) stop("newdata contains unseen levels for ", name, ".", call. = FALSE)
+      vapply(values, function(value) as.numeric(observed == value), numeric(nrow(newdata)))
+    }, spec$predictors, spec$levels))
+    colnames(result) <- spec$columns
+    return(result)
+  }
   newdata <- validate_numeric_table(newdata, "newdata")
   missing <- setdiff(spec$predictors, colnames(newdata))
   if (length(missing)) stop("newdata is missing predictors: ", paste(missing, collapse = ", "), call. = FALSE)

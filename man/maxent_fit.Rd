@@ -31,7 +31,7 @@ presence predictor table when \code{background} is supplied.}
 \item{background_weights}{Optional positive background weights.}
 
 \item{features}{Feature classes: \code{"linear"}, \code{"quadratic"}, \code{"product"},
-\code{"threshold"}, \code{"hinge"}, or combinations.}
+\code{"threshold"}, \code{"hinge"}, or categorical-only models.}
 
 \item{thresholds}{Optional named list of numeric threshold values by predictor.}
 

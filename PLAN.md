@@ -517,7 +517,7 @@ Tasks:
 - [x] Implement product features with deterministic naming/order.
 - [x] Implement threshold features and stored thresholds.
 - [x] Implement forward/reverse hinge features and stored knots.
-- [ ] Implement categorical levels/contrasts and unseen-level policy.
+- [x] Implement categorical levels/contrasts and unseen-level policy.
 - [ ] Implement auto-feature policy with boundary tests.
 - [ ] Implement feature-specific regularization and expose an auditable coefficient
   table containing class, source predictors, knot/level, scale, and penalty.
