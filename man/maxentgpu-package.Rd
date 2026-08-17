@@ -6,8 +6,8 @@
 \alias{maxentgpu-package}
 \title{maxentgpu: maximum-entropy models with Torch}
 \description{
-\code{maxentgpu} currently exports backend diagnostics while model fitting and
-prediction capabilities are under active development.
+\code{maxentgpu} provides scalar CPU fitting and backend diagnostics while
+accelerator and batch capabilities are under active development.
 }
 \seealso{
 Useful links:
