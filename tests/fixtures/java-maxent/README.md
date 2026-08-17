@@ -1,10 +1,10 @@
 # Java MaxEnt generated fixtures
 
-Generated outputs belong here but are ignored until a maintainer deliberately stages
-reviewed, compact golden files. Never place `maxent.jar` in this repository.
+Generated outputs belong here and are compact golden files produced by the pinned
+Java MaxEnt 3.4.4 generator. Never place `maxent.jar` in this repository.
 
-Acquire Java MaxEnt 3.4.4 under its upstream terms, place the jar outside the
-repository, replace the pending SHA-256 in
+To regenerate them, acquire Java MaxEnt 3.4.4 under its upstream terms, place the
+jar outside the repository, verify its SHA-256 in
 `benchmarks/manifests/reference-versions.csv`, and run:
 
 ```sh

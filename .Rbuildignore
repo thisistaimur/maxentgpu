@@ -13,5 +13,6 @@
 ^README\.Rmd$
 ^benchmarks$
 ^docs$
+^maxent$
 ^tools$
 ^tests/fixtures/.*/\.gitkeep$

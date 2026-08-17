@@ -424,7 +424,7 @@ Tasks:
 - [x] Write the four files in `inst/spec/`.
 - [x] Create tiny hand-calculated fixtures: one predictor, two predictors, weighted
   background, duplicated presences, constant predictor, `NA`, extreme logits.
-- [ ] Build scripts that generate reference outputs from `maxnet` and the pinned Java
+- [x] Build scripts that generate reference outputs from `maxnet` and the pinned Java
   MaxEnt release. Record command lines, options, hashes, and licenses.
 - [ ] Decide and document the precise mappings for feature scaling, knots, default
   class selection, regularization multipliers, clamping, raw/logistic/cloglog outputs,

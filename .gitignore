@@ -9,5 +9,12 @@ docs/
 tests/fixtures/java-maxent/*
 !tests/fixtures/java-maxent/.gitkeep
 !tests/fixtures/java-maxent/README.md
+!tests/fixtures/java-maxent/*.csv
+!tests/fixtures/java-maxent/*.dcf
+!tests/fixtures/java-maxent/*.lambdas
+!tests/fixtures/java-maxent/checksums.md5
+tests/fixtures/java-maxent/maxent.jar
+
+maxent
 
 .DS_Store

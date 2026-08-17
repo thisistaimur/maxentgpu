@@ -75,8 +75,11 @@ specification.
 - **REF-DUP-001:** verify CLI flags and behavior for duplicate removal in Java 3.4.4.
 - **REF-CAT-001:** verify Java factor levels, unseen-level behavior, and naming against
   `maxnet`'s confirmed full one-hot basis.
-- **REF-JAVA-001:** acquire the permitted Java 3.4.4 jar, record its SHA-256 and license
-  bundle, then validate the SWD generator command on a clean fixture directory.
+
+**Closed reference acquisition:** **REF-JAVA-001** is complete for the pinned Java
+3.4.4 artifact. The licensed jar is kept outside the repository; its SHA-256 and Java
+17 provenance are recorded in `benchmarks/manifests/reference-versions.csv` and
+`tests/fixtures/java-maxent/provenance.dcf`.
 
 Gate 0 remains **STOP** while any open item changes the advertised reference mapping
 or output-scale labels. Native objective work may proceed only after maintainer review

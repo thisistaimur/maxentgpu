@@ -48,8 +48,28 @@ if (nrow(java) != 1L || !identical(java$version[[1]], "3.4.4")) {
   stop("Java MaxEnt manifest must contain exactly one version 3.4.4 row.")
 }
 if (!identical(java$sha256[[1]], "REPLACE_AFTER_LICENSED_ACQUISITION")) {
-  jar <- file.path(root, "tests", "fixtures", "java-maxent", "maxent.jar")
-  if (!file.exists(jar)) stop("Java MaxEnt jar is missing: ", jar)
+  java_dir <- file.path(root, "tests", "fixtures", "java-maxent")
+  java_outputs <- file.path(java_dir, c(
+    "provenance.dcf", "maxentResults.csv", "tiny-species.lambdas",
+    "tiny-species_backgroundPredictions.csv", "checksums.md5"
+  ))
+  invisible(lapply(java_outputs, stop_if_missing))
+  java_checksums <- utils::read.table(
+    file.path(java_dir, "checksums.md5"), header = TRUE,
+    stringsAsFactors = FALSE, colClasses = c("character", "character")
+  )
+  java_paths <- file.path(root, java_checksums$file)
+  invisible(lapply(java_paths, stop_if_missing))
+  java_actual <- unname(tools::md5sum(java_paths))
+  if (!identical(tolower(java_actual), tolower(java_checksums$md5))) {
+    stop("Java MaxEnt fixture checksum mismatch.")
+  }
+  java_provenance <- read.dcf(file.path(java_dir, "provenance.dcf"))
+  if (!identical(as.character(java_provenance[1, "MaxEntVersion"]), "3.4.4") ||
+      !identical(as.character(java_provenance[1, "JarSHA256"]),
+                 as.character(java$sha256[[1]]))) {
+    stop("Java MaxEnt provenance does not match the pinned manifest.")
+  }
 }
 
 message("Reference fixture integrity passed: maxnet 0.1.4.")

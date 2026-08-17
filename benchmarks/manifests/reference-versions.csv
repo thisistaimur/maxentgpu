@@ -5,4 +5,4 @@ terra,1.9-34,https://CRAN.R-project.org/package=terra,GPL (>= 3),,pinned-for-pha
 maxnet,0.1.4,https://CRAN.R-project.org/package=maxnet,MIT + file LICENSE,,pinned
 virtualspecies,1.6.1,https://CRAN.R-project.org/package=virtualspecies,GPL (>= 2),,pinned-for-phase-6
 java,17,https://adoptium.net/,GPL-2-with-Classpath-Exception,,reference-runtime
-java-maxent,3.4.4,https://github.com/mrmaxent/Maxent,MIT plus third-party notices,REPLACE_AFTER_LICENSED_ACQUISITION,blocked-awaiting-jar
+java-maxent,3.4.4,https://github.com/mrmaxent/Maxent,MIT plus third-party notices,4c856e55412f70c5597b03cf9aaaf27e0782e0921f937262273b68bdcb8fee5e,jar-supplied-locally

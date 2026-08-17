@@ -1,0 +1,15 @@
+Generator: tools/generate-java-maxent-fixtures.R
+MaxEntVersion: 3.4.4
+JarSHA256:
+        4c856e55412f70c5597b03cf9aaaf27e0782e0921f937262273b68bdcb8fee5e
+JavaVersion: openjdk version "17.0.20" 2026-07-21 | OpenJDK Runtime
+        Environment Homebrew (build 17.0.20+0) | OpenJDK 64-Bit Server
+        VM Homebrew (build 17.0.20+0, mixed mode, sharing)
+Command: java '-Xmx1g' '-jar' 'maxent.jar'
+        'samplesfile=tests/fixtures/reference/input/samples.csv'
+        'environmentallayers=tests/fixtures/reference/input/background.csv'
+        'outputdirectory=tests/fixtures/java-maxent' 'autorun'
+        'redoifexists' 'removeduplicates=false' 'randomseed=false'
+        'threads=1' 'responsecurves=false' 'pictures=false'
+        'plots=false' 'writeplotdata=false'
+        'writebackgroundpredictions=true' 'outputformat=cloglog'

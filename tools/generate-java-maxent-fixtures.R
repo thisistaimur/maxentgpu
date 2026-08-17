@@ -58,7 +58,40 @@ write.dcf(data.frame(
   JarSHA256 = actual_sha256,
   JavaVersion = paste(system2("java", "-version", stdout = TRUE,
                               stderr = TRUE), collapse = " | "),
-  Command = paste("java", paste(shQuote(java_args), collapse = " ")),
+  Command = paste(
+    "java",
+    paste(shQuote({
+      provenance_args <- java_args
+      provenance_args[[3]] <- "maxent.jar"
+      provenance_args <- sub(
+        "^samplesfile=.*$",
+        "samplesfile=tests/fixtures/reference/input/samples.csv",
+        provenance_args
+      )
+      provenance_args <- sub(
+        "^environmentallayers=.*$",
+        "environmentallayers=tests/fixtures/reference/input/background.csv",
+        provenance_args
+      )
+      provenance_args <- sub(
+        "^outputdirectory=.*$",
+        "outputdirectory=tests/fixtures/java-maxent",
+        provenance_args
+      )
+      provenance_args
+    }), collapse = " ")
+  ),
   stringsAsFactors = FALSE
 ), file.path(output_dir, "provenance.dcf"))
+generated <- list.files(
+  output_dir,
+  pattern = "[.](csv|dcf|lambdas)$",
+  full.names = TRUE
+)
+generated_hashes <- tools::md5sum(generated)
+generated_names <- substring(normalizePath(generated), nchar(root) + 2L)
+utils::write.table(
+  data.frame(md5 = unname(generated_hashes), file = generated_names),
+  file.path(output_dir, "checksums.md5"), row.names = FALSE, quote = FALSE
+)
 message("Generated Java MaxEnt fixtures in ", output_dir)
