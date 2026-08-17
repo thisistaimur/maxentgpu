@@ -8,6 +8,15 @@ normalize_weights <- function(weights, n, name) {
   as.numeric(weights) / sum(weights)
 }
 
+normalize_penalty <- function(value, n, name, default = 1) {
+  if (is.null(value)) value <- rep(default, n)
+  if (length(value) == 1L) value <- rep(value, n)
+  if (length(value) != n || any(!is.finite(value)) || any(value < 0)) {
+    stop(name, " must contain non-negative finite multipliers for every feature.", call. = FALSE)
+  }
+  as.numeric(value)
+}
+
 stable_logz <- function(z, weights) {
   if (!length(z) || length(weights) != length(z) || any(!is.finite(z)) ||
       any(!is.finite(weights)) || any(weights <= 0)) {
@@ -42,7 +51,8 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
 #' @param presence_weights Optional positive presence weights.
 #' @param background_weights Optional positive background weights.
 #' @param features Feature classes: `"linear"`, `"quadratic"`, or both.
-#' @param regularization A list with non-negative `lambda1` and `lambda2`.
+#' @param regularization A list with non-negative `lambda1` and `lambda2`, and
+#'   optional feature-specific non-negative `penalty_l1` and `penalty_l2` vectors.
 #' @param control A list with `max_iter`, `tol`, and `step`.
 #' @return An object of class `maxent_fit`.
 #' @export
@@ -77,6 +87,8 @@ maxent_fit <- function(x, presence, background = NULL,
   if (length(lambda1) != 1L || length(lambda2) != 1L || !is.finite(lambda1) || !is.finite(lambda2) || lambda1 < 0 || lambda2 < 0) {
     stop("regularization lambda1 and lambda2 must be finite and non-negative scalars.", call. = FALSE)
   }
+  spec$penalty_l1 <- normalize_penalty(regularization$penalty_l1, length(spec$columns), "regularization penalty_l1")
+  spec$penalty_l2 <- normalize_penalty(regularization$penalty_l2, length(spec$columns), "regularization penalty_l2")
   max_iter <- as.integer(control$max_iter %||% 2000L)
   tol <- as.numeric(control$tol %||% 1e-8)
   step <- as.numeric(control$step %||% 1)

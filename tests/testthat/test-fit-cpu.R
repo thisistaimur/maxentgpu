@@ -72,6 +72,20 @@ test_that("weighted duplicate rows preserve the normalized objective", {
                aggregated$diagnostics$final_objective, tolerance = 1e-7)
 })
 
+test_that("feature-specific regularization multipliers are audited", {
+  x <- data.frame(x1 = c(0, 1, 2), x2 = c(1, 2, 4))
+  fit <- maxent_fit(x, c(TRUE, TRUE, FALSE), features = c("linear", "quadratic"),
+                    regularization = list(lambda1 = 0.1, lambda2 = 0.2,
+                                          penalty_l1 = c(1, 2, 3, 4),
+                                          penalty_l2 = c(4, 3, 2, 1)))
+  coefficients <- maxent_coefficients(fit)
+  expect_equal(coefficients$penalty_l1, c(1, 2, 3, 4))
+  expect_equal(coefficients$penalty_l2, c(4, 3, 2, 1))
+  expect_error(maxent_fit(x, c(TRUE, TRUE, FALSE),
+                          regularization = list(penalty_l1 = c(1, 2))),
+               "every feature")
+})
+
 test_that("analytic smooth gradient agrees with central differences", {
   presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
   background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)

@@ -30,7 +30,8 @@ presence predictor table when \code{background} is supplied.}
 
 \item{features}{Feature classes: \code{"linear"}, \code{"quadratic"}, or both.}
 
-\item{regularization}{A list with non-negative \code{lambda1} and \code{lambda2}.}
+\item{regularization}{A list with non-negative \code{lambda1} and \code{lambda2}, and
+optional feature-specific non-negative \code{penalty_l1} and \code{penalty_l2} vectors.}
 
 \item{control}{A list with \code{max_iter}, \code{tol}, and \code{step}.}
 }
