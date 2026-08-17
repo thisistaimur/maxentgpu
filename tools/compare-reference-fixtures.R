@@ -31,6 +31,16 @@ native <- data.frame(
   link = maxentgpu:::predict.maxent_fit(fit, newdata, type = "link"),
   raw = maxentgpu:::predict.maxent_fit(fit, newdata, type = "raw")
 )
+mapped_fit <- maxentgpu::maxent_fit(
+  x = presence,
+  presence = presence,
+  background = background,
+  features = c("linear", "quadratic"),
+  regularization = list(lambda1 = scales$regmult[[1]], lambda2 = 0,
+                        penalty_l1 = penalties$penalty_factor,
+                        penalty_l2 = 0),
+  control = list(max_iter = 10000L, tol = 1e-9)
+)
 if (!identical(native$row, reference$row) || nrow(native) != nrow(reference)) {
   stop("reference and package fixture row ordering differ.")
 }
@@ -69,3 +79,6 @@ write.csv(report, file = "", row.names = FALSE)
 message("Comparison is diagnostic only: scales are not declared equivalent.")
 message("maxnet penalty factors: ", paste(penalties$feature, penalties$penalty_factor,
                                            sep = "=", collapse = ", "))
+message("mapped package L1 fit: converged=", mapped_fit$diagnostics$converged,
+        ", iterations=", mapped_fit$diagnostics$iterations,
+        ", nonzero_coefficients=", sum(abs(mapped_fit$beta) > 0))
