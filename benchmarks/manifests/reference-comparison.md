@@ -3,6 +3,9 @@
 The pinned `maxnet` fixture is generated from `maxnet` 0.1.4 using the command
 recorded in `tests/fixtures/maxnet/provenance.dcf`. Its coefficients and prediction
 columns are retained as an external reference, not as package-native golden values.
+The generator also records a `regmult = 1e-8` weakly regularized fixture because
+`maxnet`/glmnet rejects an exactly zero penalty; this is a near-unregularized
+diagnostic target, not an unregularized equivalence claim.
 
 The current scalar implementation intentionally uses a different normalization
 contract:
