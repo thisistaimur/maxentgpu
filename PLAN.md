@@ -494,6 +494,10 @@ The maxnet implementation's terminal glmnet scale is `mean(reg) * sum(p) /
 sum(p + 100 * (1 - p))`; this evaluates to `0.0004733343` for the pinned fixture and
 is now passed to the diagnostic mapped fit. This is the reference-side scale, not yet
 validated as the package-side `lambda1` conversion.
+An exploratory package-side sweep on the same fixture produces low affine link RMSE
+near `lambda1 = 0.04`, but that value is fixture-specific and must not become a
+default or a compatibility claim. Re-run `tools/calibrate-reference-regularization.R`
+on independent fixtures before using any conversion in paper results.
 
 ### Phase 2 — Complete MaxEnt feature fidelity
 

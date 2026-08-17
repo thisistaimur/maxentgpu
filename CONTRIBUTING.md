@@ -19,6 +19,7 @@ No task runner is required. Run commands from the repository root.
 | Check hand fixtures | `Rscript tools/check-hand-fixtures.R .` |
 | Check reference fixture integrity | `Rscript tools/check-reference-fixtures.R .` |
 | Compare package-native fit with pinned maxnet fixture | `Rscript tools/compare-reference-fixtures.R .` |
+| Calibrate diagnostic regularization scale | `Rscript tools/calibrate-reference-regularization.R .` |
 | Run unit tests | `Rscript -e 'testthat::test_local()'` |
 | Build source package | `R CMD build .` |
 | Check source package | `R CMD check --as-cran maxentgpu_*.tar.gz` |
