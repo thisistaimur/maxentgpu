@@ -28,3 +28,52 @@ test_that("weighted duplicate rows preserve the normalized objective", {
   expect_equal(expanded$diagnostics$final_objective,
                aggregated$diagnostics$final_objective, tolerance = 1e-7)
 })
+
+test_that("analytic smooth gradient agrees with central differences", {
+  presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
+  background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)
+  w <- c(0.25, 0.75)
+  q <- c(0.2, 0.3, 0.5)
+  beta <- c(0.15, -0.2)
+  lambda2 <- 0.4
+  objective <- function(value) {
+    maxentgpu:::objective_components(beta = value,
+      presence_phi = presence_phi, background_phi = background_phi,
+      w = w, q = q, lambda1 = 0, lambda2 = lambda2,
+      r1 = c(1, 1), r2 = c(1, 1))$value
+  }
+  analytic <- maxentgpu:::objective_components(beta, presence_phi, background_phi,
+    w, q, 0, lambda2, c(1, 1), c(1, 1))$gradient
+  epsilon <- 1e-6
+  numeric <- vapply(seq_along(beta), function(index) {
+    plus <- beta
+    minus <- beta
+    plus[index] <- plus[index] + epsilon
+    minus[index] <- minus[index] - epsilon
+    (objective(plus) - objective(minus)) / (2 * epsilon)
+  }, numeric(1))
+  expect_equal(analytic, numeric, tolerance = 1e-7)
+})
+
+test_that("Torch autograd agrees with the stable analytic gradient", {
+  skip_if_not_installed("torch")
+  presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
+  background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)
+  w <- c(0.25, 0.75)
+  q <- c(0.2, 0.3, 0.5)
+  beta <- c(0.15, -0.2)
+  lambda2 <- 0.4
+  analytic <- maxentgpu:::objective_components(beta, presence_phi, background_phi,
+    w, q, 0, lambda2, c(1, 1), c(1, 1))$gradient
+  beta_t <- torch::torch_tensor(beta, dtype = torch::torch_float64(), requires_grad = TRUE)
+  presence_t <- torch::torch_tensor(presence_phi, dtype = torch::torch_float64())
+  background_t <- torch::torch_tensor(background_phi, dtype = torch::torch_float64())
+  w_t <- torch::torch_tensor(w, dtype = torch::torch_float64())
+  q_t <- torch::torch_tensor(q, dtype = torch::torch_float64())
+  z_presence <- presence_t$matmul(beta_t)
+  z_background <- background_t$matmul(beta_t)
+  logz <- torch::torch_logsumexp(torch::torch_log(q_t) + z_background, dim = 1)
+  loss <- logz - (w_t * z_presence)$sum() + 0.5 * lambda2 * (beta_t^2)$sum()
+  loss$backward()
+  expect_equal(as.numeric(beta_t$grad), analytic, tolerance = 1e-7)
+})
