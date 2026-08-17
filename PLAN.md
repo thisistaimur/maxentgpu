@@ -450,13 +450,13 @@ is unresolved, add focused fixtures; do not begin CUDA work.
 
 Tasks:
 
-- [ ] Implement validation and canonical internal data objects.
-- [ ] Implement immutable feature spec fitting/application for L and Q.
-- [ ] Implement weighted stable objective, autograd gradient, penalty, and diagnostics.
-- [ ] Implement proximal-gradient/FISTA solver with backtracking and convergence tests.
-- [ ] Add finite-difference gradient and hand-calculated objective tests.
-- [ ] Implement `maxent_fit()`, `predict()`, print/summary/coefficient methods.
-- [ ] Implement link and raw outputs; enable logistic/cloglog only when their fixture
+- [x] Implement validation and canonical internal data objects.
+- [x] Implement immutable feature spec fitting/application for L and Q.
+- [x] Implement weighted stable objective, autograd-validated gradient, penalty, and diagnostics.
+- [x] Implement proximal-gradient/FISTA solver with backtracking and convergence tests.
+- [x] Add finite-difference gradient and hand-calculated objective tests.
+- [x] Implement `maxent_fit()`, `predict()`, print/summary/coefficient methods.
+- [x] Implement link and raw outputs; enable logistic/cloglog only when their fixture
   comparisons pass.
 - [ ] Add numeric guards for all-zero weights, zero variance, overflow/underflow,
   empty presence/background sets, and rank-deficient features.

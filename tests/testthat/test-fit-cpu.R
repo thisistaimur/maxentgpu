@@ -11,6 +11,9 @@ test_that("CPU fit has stable objective and link/raw predictions", {
                     control = list(max_iter = 500L, tol = 1e-9, step = 1))
   diagnostics <- maxent_diagnostics(fit)
   expect_true(all(diff(diagnostics$objective) <= 1e-10))
+  expect_true(diagnostics$stop_reason %in% c("parameter_change", "max_iter"))
+  expect_true(is.finite(diagnostics$parameter_change))
+  expect_true(is.finite(diagnostics$smooth_gradient_norm))
   expect_true(all(is.finite(predict(fit, x, type = "link"))))
   expect_true(all(predict(fit, x, type = "raw") > 0))
   expect_equal(sum(fit$background_weights * predict(fit, fit$background, type = "raw")), 1, tolerance = 1e-8)
@@ -49,6 +52,11 @@ test_that("invalid training inputs fail explicitly", {
   fit <- maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE), features = "linear")
   expect_error(predict(fit, data.frame(y = 1), type = "raw"), "missing predictors")
   expect_error(predict(fit, data.frame(x = 1), type = "cloglog"), "should be one of")
+})
+
+test_that("numeric guards reject invalid partition inputs", {
+  expect_error(maxentgpu:::stable_logz(c(1, Inf), c(0.5, 0.5)), "finite")
+  expect_error(maxentgpu:::stable_logz(c(1, 2), c(0, 1)), "strictly positive")
 })
 
 test_that("weighted duplicate rows preserve the normalized objective", {

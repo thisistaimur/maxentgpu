@@ -9,6 +9,10 @@ normalize_weights <- function(weights, n, name) {
 }
 
 stable_logz <- function(z, weights) {
+  if (!length(z) || length(weights) != length(z) || any(!is.finite(z)) ||
+      any(!is.finite(weights)) || any(weights <= 0)) {
+    stop("log-partition inputs must be finite and have strictly positive weights.", call. = FALSE)
+  }
   terms <- log(weights) + z
   pivot <- max(terms)
   value <- pivot + log(sum(exp(terms - pivot)))
@@ -83,6 +87,9 @@ maxent_fit <- function(x, presence, background = NULL,
   momentum <- 1
   values <- numeric(max_iter)
   converged <- FALSE
+  stop_reason <- "max_iter"
+  parameter_change <- Inf
+  smooth_gradient_norm <- Inf
   for (iteration in seq_len(max_iter)) {
     baseline <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     values[iteration] <- baseline$value
@@ -105,10 +112,15 @@ maxent_fit <- function(x, presence, background = NULL,
       trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     }
     if (max(abs(candidate - beta)) <= tol) {
+      parameter_change <- max(abs(candidate - beta))
+      smooth_gradient_norm <- max(abs(trial$gradient - lambda2 * spec$penalty_l2 * candidate))
       beta <- candidate
       converged <- TRUE
+      stop_reason <- "parameter_change"
       break
     }
+    parameter_change <- max(abs(candidate - beta))
+    smooth_gradient_norm <- max(abs(trial$gradient - lambda2 * spec$penalty_l2 * candidate))
     previous <- beta
     beta <- candidate
     if (accelerated) {
@@ -120,6 +132,10 @@ maxent_fit <- function(x, presence, background = NULL,
     }
   }
   final <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+  if (!converged) {
+    parameter_change <- if (is.finite(parameter_change)) parameter_change else NA_real_
+    smooth_gradient_norm <- max(abs(final$gradient - lambda2 * spec$penalty_l2 * beta))
+  }
   values <- values[seq_len(iteration)]
   structure(list(beta = beta, feature_spec = spec, presence = presence_x,
                  background = background_x, presence_weights = w,
@@ -128,6 +144,9 @@ maxent_fit <- function(x, presence, background = NULL,
                                   (drop(background_phi %*% beta) - final$logz)),
                  diagnostics = list(iterations = iteration, converged = converged,
                                     objective = values, final_objective = final$value,
+                                    parameter_change = parameter_change,
+                                    smooth_gradient_norm = smooth_gradient_norm,
+                                    stop_reason = stop_reason,
                                     device = "cpu", dtype = "float64")),
             class = "maxent_fit")
 }
