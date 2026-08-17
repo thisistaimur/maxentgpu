@@ -218,7 +218,14 @@ maxent_diagnostics <- function(object) {
 #' @export
 maxent_coefficients <- function(object) {
   if (!inherits(object, "maxent_fit")) stop("object is not a maxent_fit model.", call. = FALSE)
-  data.frame(feature = object$feature_spec$columns, coefficient = unname(object$beta),
+  feature <- object$feature_spec$columns
+  feature_class <- sub("^([^:]+):.*$", "\\1", feature)
+  source <- sub("^[^:]+:", "", feature)
+  knot <- ifelse(grepl("[<>]=?", source), sub("^.*[<>]=?", "", source), NA_character_)
+  level <- ifelse(grepl("=", source), sub("^.*=", "", source), NA_character_)
+  source_predictors <- sub("[<>]=?.*$", "", sub("=.*$", "", source))
+  data.frame(feature = feature, class = feature_class, source = source_predictors,
+             knot = knot, level = level, coefficient = unname(object$beta),
              penalty_l1 = object$feature_spec$penalty_l1,
              penalty_l2 = object$feature_spec$penalty_l2,
              row.names = NULL)

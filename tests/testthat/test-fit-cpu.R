@@ -161,6 +161,7 @@ test_that("feature-specific regularization multipliers are audited", {
   coefficients <- maxent_coefficients(fit)
   expect_equal(coefficients$penalty_l1, c(1, 2, 3, 4))
   expect_equal(coefficients$penalty_l2, c(4, 3, 2, 1))
+  expect_true(all(c("class", "source", "knot", "level") %in% names(coefficients)))
   expect_error(maxent_fit(x, c(TRUE, TRUE, TRUE, FALSE, FALSE),
                           regularization = list(penalty_l1 = c(1, 2))),
                "every feature")

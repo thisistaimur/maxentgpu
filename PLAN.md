@@ -519,7 +519,7 @@ Tasks:
 - [x] Implement forward/reverse hinge features and stored knots.
 - [x] Implement categorical levels/contrasts and unseen-level policy.
 - [x] Implement auto-feature policy with boundary tests.
-- [ ] Implement feature-specific regularization and expose an auditable coefficient
+- [x] Implement feature-specific regularization and expose an auditable coefficient
   table containing class, source predictors, knot/level, scale, and penalty.
 - [x] Test feature application in chunks and whole-matrix mode for identity.
 - [x] Add property tests for permutations, constant columns, duplicated knots, extreme
