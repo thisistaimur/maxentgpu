@@ -458,7 +458,7 @@ Tasks:
 - [x] Implement `maxent_fit()`, `predict()`, print/summary/coefficient methods.
 - [x] Implement link and raw outputs; enable logistic/cloglog only when their fixture
   comparisons pass.
-- [ ] Add numeric guards for all-zero weights, zero variance, overflow/underflow,
+- [x] Add numeric guards for all-zero weights, zero variance, overflow/underflow,
   empty presence/background sets, and rank-deficient features.
 - [ ] Compare unregularized and regularized L/LQ fixtures with references.
 

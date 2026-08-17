@@ -80,6 +80,10 @@ maxent_fit <- function(x, presence, background = NULL,
   spec <- new_feature_spec(rbind(presence_x, background_x), classes)
   presence_phi <- apply_feature_spec(spec, presence_x)
   background_phi <- apply_feature_spec(spec, background_x)
+  design_rank <- qr(rbind(presence_phi, background_phi), tol = 1e-10)$rank
+  if (design_rank < ncol(presence_phi)) {
+    stop("feature design matrix is rank-deficient; remove duplicated or collinear features.", call. = FALSE)
+  }
   w <- normalize_weights(presence_weights, nrow(presence_phi), "presence_weights")
   q <- normalize_weights(background_weights, nrow(background_phi), "background_weights")
   lambda1 <- as.numeric(regularization$lambda1 %||% 0)

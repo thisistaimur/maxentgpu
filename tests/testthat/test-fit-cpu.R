@@ -52,6 +52,9 @@ test_that("invalid training inputs fail explicitly", {
   fit <- maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE), features = "linear")
   expect_error(predict(fit, data.frame(y = 1), type = "raw"), "missing predictors")
   expect_error(predict(fit, data.frame(x = 1), type = "cloglog"), "should be one of")
+  expect_error(maxent_fit(data.frame(x1 = c(1, 2, 3), x2 = c(1, 2, 3)),
+                          c(TRUE, FALSE, FALSE), features = "linear"),
+               "rank-deficient")
 })
 
 test_that("numeric guards reject invalid partition inputs", {
@@ -73,15 +76,15 @@ test_that("weighted duplicate rows preserve the normalized objective", {
 })
 
 test_that("feature-specific regularization multipliers are audited", {
-  x <- data.frame(x1 = c(0, 1, 2), x2 = c(1, 2, 4))
-  fit <- maxent_fit(x, c(TRUE, TRUE, FALSE), features = c("linear", "quadratic"),
+  x <- data.frame(x1 = c(0, 1, 2, 3, 4), x2 = c(1, 2, 4, 1, 3))
+  fit <- maxent_fit(x, c(TRUE, TRUE, TRUE, FALSE, FALSE), features = c("linear", "quadratic"),
                     regularization = list(lambda1 = 0.1, lambda2 = 0.2,
                                           penalty_l1 = c(1, 2, 3, 4),
                                           penalty_l2 = c(4, 3, 2, 1)))
   coefficients <- maxent_coefficients(fit)
   expect_equal(coefficients$penalty_l1, c(1, 2, 3, 4))
   expect_equal(coefficients$penalty_l2, c(4, 3, 2, 1))
-  expect_error(maxent_fit(x, c(TRUE, TRUE, FALSE),
+  expect_error(maxent_fit(x, c(TRUE, TRUE, TRUE, FALSE, FALSE),
                           regularization = list(penalty_l1 = c(1, 2))),
                "every feature")
 })
