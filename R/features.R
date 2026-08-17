@@ -4,8 +4,9 @@ normalize_feature_classes <- function(classes) {
   classes[classes %in% c("q", "quadratic")] <- "quadratic"
   classes[classes %in% c("p", "product", "pairwise")] <- "product"
   classes[classes %in% c("t", "threshold", "thresholds")] <- "threshold"
-  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product", "threshold"))) {
-    stop("features must contain only 'linear', 'quadratic', 'product', and/or 'threshold'.", call. = FALSE)
+  classes[classes %in% c("h", "hinge", "hinges")] <- "hinge"
+  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product", "threshold", "hinge"))) {
+    stop("features must contain only 'linear', 'quadratic', 'product', 'threshold', and/or 'hinge'.", call. = FALSE)
   }
   unique(classes)
 }
@@ -29,7 +30,7 @@ validate_numeric_table <- function(x, name) {
 }
 
 new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE,
-                             thresholds = NULL) {
+                             thresholds = NULL, knots = NULL) {
   x <- validate_numeric_table(x, "presence/background predictors")
   classes <- normalize_feature_classes(classes)
   ranges <- rbind(min = apply(x, 2L, min), max = apply(x, 2L, max))
@@ -52,6 +53,19 @@ new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE
   if ("threshold" %in% classes && !any(lengths(threshold_values))) {
     stop("threshold features require at least one threshold.", call. = FALSE)
   }
+  knot_values <- lapply(seq_len(ncol(x)), function(index) {
+    value <- if (is.null(knots)) NULL else knots[[colnames(x)[index]]]
+    if (is.null(value)) value <- threshold_values[[index]]
+    value <- sort(unique(as.numeric(value)))
+    if (any(!is.finite(value)) || any(value <= ranges["min", index]) || any(value >= ranges["max", index])) {
+      stop("knots must be finite and strictly inside predictor ranges.", call. = FALSE)
+    }
+    value
+  })
+  names(knot_values) <- colnames(x)
+  if ("hinge" %in% classes && !any(lengths(knot_values))) {
+    stop("hinge features require at least one knot.", call. = FALSE)
+  }
   columns <- unlist(lapply(classes, function(class) {
     if (class == "linear") paste0("L:", colnames(x))
     else if (class == "quadratic") paste0("Q:", colnames(x))
@@ -59,9 +73,14 @@ new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE
     else if (class == "product") {
       pairs <- utils::combn(colnames(x), 2L)
       paste0("P:", pairs[1L, ], "*", pairs[2L, ])
-    } else {
+    } else if (class == "threshold") {
       unlist(Map(function(name, values) paste0("T:", name, "<=", format(values, trim = TRUE, scientific = FALSE)),
                  names(threshold_values), threshold_values), use.names = FALSE)
+    } else {
+      unlist(Map(function(name, values) c(
+        paste0("H+:", name, ">", format(values, trim = TRUE, scientific = FALSE)),
+        paste0("H-:", name, "<", format(values, trim = TRUE, scientific = FALSE))),
+        names(knot_values), knot_values), use.names = FALSE)
     }
   }), use.names = FALSE)
   structure(list(
@@ -70,6 +89,7 @@ new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE
     classes = classes,
     ranges = ranges,
     thresholds = threshold_values,
+    knots = knot_values,
     columns = columns,
     clamp = isTRUE(clamp),
     penalty_l1 = rep(1, length(columns)),
@@ -99,10 +119,15 @@ apply_feature_spec <- function(spec, newdata, clamp = spec$clamp) {
         out[[length(out) + 1L]] <- vapply(seq_len(ncol(pairs)), function(pair) {
           x[, pairs[1L, pair]] * x[, pairs[2L, pair]]
         }, numeric(nrow(x)))
-      } else {
+      } else if (class == "threshold") {
         out[[length(out) + 1L]] <- do.call(cbind, Map(function(name, values) {
           outer(x[, name], values, FUN = "<=") * 1
         }, names(spec$thresholds), spec$thresholds))
+      } else {
+        out[[length(out) + 1L]] <- do.call(cbind, Map(function(name, values) {
+          cbind(outer(x[, name], values, FUN = function(value, knot) pmax(value - knot, 0)),
+                outer(x[, name], values, FUN = function(value, knot) pmax(knot - value, 0)))
+        }, names(spec$knots), spec$knots))
       }
     }
   }

@@ -23,6 +23,15 @@ test_that("threshold features store knots and apply deterministic indicators", {
   expect_equal(spec$thresholds$x1, c(1.5, 2.5))
 })
 
+test_that("hinge features store knots and apply forward and reverse bases", {
+  x <- data.frame(x1 = c(0, 1, 2, 3, 4), x2 = c(1, 2, 4, 1, 3))
+  spec <- maxentgpu:::new_feature_spec(x, classes = "hinge",
+                                       knots = list(x1 = 2, x2 = 2.5))
+  expect_identical(spec$columns, c("H+:x1>2", "H-:x1<2", "H+:x2>2.5", "H-:x2<2.5"))
+  expect_equal(unname(apply_feature_spec(spec, x)[1, ]), c(0, 2, 0, 1.5))
+  expect_equal(spec$knots$x1, 2)
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
@@ -66,7 +75,7 @@ test_that("invalid training inputs fail explicitly", {
                           presence_weights = c(1, 0)), "strictly positive")
   expect_error(maxent_fit(data.frame(x = c(1, 1)), c(TRUE, FALSE)), "constant")
   expect_error(maxent_fit(data.frame(x = c(1, 2)), c(TRUE, FALSE),
-                          features = "hinge"), "linear.*quadratic.*product")
+                          features = "bogus"), "linear.*quadratic.*product.*threshold.*hinge")
   fit <- maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE), features = "linear")
   expect_error(predict(fit, data.frame(y = 1), type = "raw"), "missing predictors")
   expect_error(predict(fit, data.frame(x = 1), type = "cloglog"), "should be one of")

@@ -12,6 +12,7 @@ maxent_fit(
   background_weights = NULL,
   features = c("linear", "quadratic"),
   thresholds = NULL,
+  knots = NULL,
   regularization = list(lambda1 = 0, lambda2 = 1),
   control = list(max_iter = 2000L, tol = 1e-08, step = 1)
 )
@@ -30,9 +31,11 @@ presence predictor table when \code{background} is supplied.}
 \item{background_weights}{Optional positive background weights.}
 
 \item{features}{Feature classes: \code{"linear"}, \code{"quadratic"}, \code{"product"},
-\code{"threshold"}, or combinations.}
+\code{"threshold"}, \code{"hinge"}, or combinations.}
 
 \item{thresholds}{Optional named list of numeric threshold values by predictor.}
+
+\item{knots}{Optional named list of numeric hinge knots by predictor.}
 
 \item{regularization}{A list with non-negative \code{lambda1} and \code{lambda2}, and
 optional feature-specific non-negative \code{penalty_l1} and \code{penalty_l2} vectors.}
