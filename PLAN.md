@@ -494,10 +494,12 @@ The maxnet implementation's terminal glmnet scale is `mean(reg) * sum(p) /
 sum(p + 100 * (1 - p))`; this evaluates to `0.0004733343` for the pinned fixture and
 is now passed to the diagnostic mapped fit. This is the reference-side scale, not yet
 validated as the package-side `lambda1` conversion.
-An exploratory package-side sweep on the current fixture produces low affine link RMSE
-near `lambda1 = 0.13` (about `0.0018` for LQ and `0.0025` for linear), but that value is fixture-specific and must not become a
-default or a compatibility claim. Re-run `tools/calibrate-reference-regularization.R`
-on independent fixtures before using any conversion in paper results.
+An earlier exploratory sweep near `lambda1 = 0.13` was produced with a stale
+installed package that did not apply the new feature-specific penalties and is
+invalid evidence. With the current source package, direct mapped factors do not
+converge in the low-lambda range. Re-run `tools/calibrate-reference-regularization.R`
+only after installing the current source, and do not use any candidate as a default
+or compatibility claim until an independent conversion is validated.
 The reference generator now also emits matched linear-only and weakly regularized
 linear fixtures; these are the first independent feature-class check for that sweep.
 Run the calibration tool with the optional `linear_` prefix to compare the candidate
