@@ -133,7 +133,7 @@ test_that("invalid training inputs fail explicitly", {
                           c(TRUE, FALSE, FALSE), features = "linear"),
                "rank-deficient")
   expect_error(maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE),
-                          control = list(device = "cuda")), "not implemented")
+                          control = list(device = "cuda")), "requires control engine")
   expect_error(maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE),
                           control = list(dtype = "float32")), "requires dtype")
 })

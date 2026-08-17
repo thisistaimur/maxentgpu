@@ -26,9 +26,6 @@ normalize_execution <- function(control) {
   if (length(dtype) != 1L || !dtype %in% c("float32", "float64")) {
     stop("control dtype must be 'float32' or 'float64'.", call. = FALSE)
   }
-  if (device == "auto") device <- "cpu"
-  if (device != "cpu") stop("accelerator fitting is not implemented yet; use device = 'cpu'.", call. = FALSE)
-  if (dtype != "float64") stop("CPU fitting currently requires dtype = 'float64'.", call. = FALSE)
   engine <- tolower(as.character(control$engine %||% "analytic"))
   if (length(engine) != 1L || !engine %in% c("analytic", "torch")) {
     stop("control engine must be 'analytic' or 'torch'.", call. = FALSE)
@@ -36,6 +33,20 @@ normalize_execution <- function(control) {
   if (engine == "torch" && !requireNamespace("torch", quietly = TRUE)) {
     stop("control engine = 'torch' requires the torch package.", call. = FALSE)
   }
+  if (device == "auto") {
+    if (requireNamespace("torch", quietly = TRUE) && isTRUE(torch::cuda_is_available())) device <- "cuda"
+    else if (requireNamespace("torch", quietly = TRUE) && isTRUE(torch::backends_mps_is_available())) device <- "mps"
+    else device <- "cpu"
+  }
+  if (device != "cpu" && engine != "torch") stop("accelerator fitting requires control engine = 'torch'.", call. = FALSE)
+  if (device == "cuda" && (!requireNamespace("torch", quietly = TRUE) || !isTRUE(torch::cuda_is_available()))) {
+    stop("CUDA is unavailable for the installed torch runtime.", call. = FALSE)
+  }
+  if (device == "mps" && (!requireNamespace("torch", quietly = TRUE) || !isTRUE(torch::backends_mps_is_available()))) {
+    stop("MPS is unavailable for the installed torch runtime.", call. = FALSE)
+  }
+  if (device == "cpu" && dtype != "float64") stop("CPU fitting currently requires dtype = 'float64'.", call. = FALSE)
+  if (device == "mps" && dtype == "float64") stop("MPS fitting requires dtype = 'float32'.", call. = FALSE)
   list(device = device, dtype = dtype, engine = engine)
 }
 
@@ -63,20 +74,21 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
        gradient = gradient, pi = pi)
 }
 
-torch_objective_components <- function(beta, presence_phi, background_phi, w, q, lambda1, lambda2, r1, r2) {
+torch_objective_components <- function(beta, presence_phi, background_phi, w, q, lambda1, lambda2, r1, r2,
+                                       device = "cpu", dtype = "float64") {
   if (!requireNamespace("torch", quietly = TRUE)) stop("torch is required for the autograd oracle.", call. = FALSE)
-  dtype <- torch::torch_float64()
-  beta_t <- torch::torch_tensor(beta, dtype = dtype, requires_grad = TRUE)
-  presence_t <- torch::torch_tensor(presence_phi, dtype = dtype)
-  background_t <- torch::torch_tensor(background_phi, dtype = dtype)
-  w_t <- torch::torch_tensor(w, dtype = dtype)
-  q_t <- torch::torch_tensor(q, dtype = dtype)
+  torch_dtype <- if (identical(dtype, "float32")) torch::torch_float32() else torch::torch_float64()
+  beta_t <- torch::torch_tensor(beta, dtype = torch_dtype, device = device, requires_grad = TRUE)
+  presence_t <- torch::torch_tensor(presence_phi, dtype = torch_dtype, device = device)
+  background_t <- torch::torch_tensor(background_phi, dtype = torch_dtype, device = device)
+  w_t <- torch::torch_tensor(w, dtype = torch_dtype, device = device)
+  q_t <- torch::torch_tensor(q, dtype = torch_dtype, device = device)
   z_presence <- presence_t$matmul(beta_t)
   z_background <- background_t$matmul(beta_t)
   logz <- torch::torch_logsumexp(torch::torch_log(q_t) + z_background, dim = 1)
   smooth <- logz - (w_t * z_presence)$sum()
-  penalty <- lambda1 * (torch::torch_tensor(r1, dtype = dtype) * torch::torch_abs(beta_t))$sum() +
-    0.5 * lambda2 * (torch::torch_tensor(r2, dtype = dtype) * beta_t^2)$sum()
+  penalty <- lambda1 * (torch::torch_tensor(r1, dtype = torch_dtype, device = device) * torch::torch_abs(beta_t))$sum() +
+    0.5 * lambda2 * (torch::torch_tensor(r2, dtype = torch_dtype, device = device) * beta_t^2)$sum()
   value <- smooth + penalty
   value$backward()
   list(value = as.numeric(value$item()), gradient = as.numeric(beta_t$grad))
@@ -162,7 +174,8 @@ maxent_fit <- function(x, presence, background = NULL,
   accelerated <- isTRUE(control$accelerated %||% TRUE)
   objective_eval <- if (execution$engine == "torch") {
     function(beta_value, ...) {
-      result <- torch_objective_components(beta = beta_value, ...)
+      result <- torch_objective_components(beta = beta_value, ..., device = execution$device,
+                                           dtype = execution$dtype)
       analytic <- objective_components(beta = beta_value, ...)
       analytic[c("smooth", "logz", "pi", "gradient")] <- NULL
       list(value = result$value, gradient = result$gradient,
