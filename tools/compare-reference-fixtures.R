@@ -36,7 +36,7 @@ mapped_fit <- maxentgpu::maxent_fit(
   presence = presence,
   background = background,
   features = c("linear", "quadratic"),
-  regularization = list(lambda1 = scales$regmult[[1]], lambda2 = 0,
+  regularization = list(lambda1 = scales$glmnet_lambda_min[[1]], lambda2 = 0,
                         penalty_l1 = penalties$penalty_factor,
                         penalty_l2 = 0),
   control = list(max_iter = 10000L, tol = 1e-9)

@@ -490,6 +490,10 @@ paper must report the objective normalization, penalty convention, conversion me
 fixture versions, and any residual coefficient/prediction differences. Until a
 conversion is derived and validated on independent L/LQ fixtures, do not describe
 the package as maxnet-compatible and do not use the direct factors as defaults.
+The maxnet implementation's terminal glmnet scale is `mean(reg) * sum(p) /
+sum(p + 100 * (1 - p))`; this evaluates to `0.0004733343` for the pinned fixture and
+is now passed to the diagnostic mapped fit. This is the reference-side scale, not yet
+validated as the package-side `lambda1` conversion.
 
 ### Phase 2 — Complete MaxEnt feature fidelity
 

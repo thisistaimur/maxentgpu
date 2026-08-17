@@ -1,2 +1,2 @@
-"regmult","alpha","entropy","n_background"
-1,-4.19895481456306,2.6827036962386,8
+"regmult","alpha","entropy","n_background","glmnet_lambda_min"
+1,-4.19895481456306,2.6827036962386,8,0.000473334280240511

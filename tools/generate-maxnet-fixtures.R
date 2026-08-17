@@ -34,7 +34,9 @@ write_fixture <- function(regmult, prefix = "") {
                    row.names = FALSE)
   utils::write.csv(data.frame(regmult = regmult, alpha = unname(fit$alpha),
                               entropy = unname(fit$entropy),
-                              n_background = nrow(background)),
+                              n_background = nrow(background),
+                              glmnet_lambda_min = mean(fit$penalty.factor) *
+                                sum(p) / sum(p + (1 - p) * 100)),
                    file.path(output_dir, paste0(prefix, "scales.csv")), row.names = FALSE)
   penalty <- data.frame(feature = names(fit$penalty.factor),
                         penalty_factor = unname(fit$penalty.factor))

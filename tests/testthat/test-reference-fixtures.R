@@ -11,6 +11,7 @@ test_that("pinned reference fixtures are readable and finite", {
   expect_true(all(is.finite(maxnet_weakly_regularized$link)))
   expect_equal(scales$n_background, 8L)
   expect_true(is.finite(scales$alpha) && is.finite(scales$entropy))
+  expect_lt(abs(scales$glmnet_lambda_min - 0.0004733343), 1e-8)
   expect_equal(penalties$feature, c("x1", "x2", "I(x1^2)", "I(x2^2)"))
   expect_true(all(is.finite(penalties$penalty_factor) & penalties$penalty_factor > 0))
   expect_true(nrow(java) >= 1L)

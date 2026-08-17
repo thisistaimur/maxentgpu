@@ -67,7 +67,9 @@ specification.
   adjustments onto explicit `lambda * r_k` values. The pinned maxnet LQ fixture uses
   factors `0.0389711432` (L) and `0.0566423814` (Q); direct use with package
   `lambda1 = 1` collapses the package fit to zero coefficients, confirming a scale
-  mismatch that remains unresolved.
+  mismatch that remains unresolved. maxnet's glmnet path scales the terminal
+  regularization value as `mean(reg) * sum(p) / sum(p + 100 * (1 - p))`; for the
+  pinned fixture this is `0.0004733343`, which is recorded in `*scales.csv`.
 - **REF-SCALE-001:** confirm on Java 3.4.4 the entropy and raw-output mapping already
   established algebraically and executably for `maxnet` 0.1.4.
 - **REF-WEIGHT-001:** determine which presence/background weighting operations are
