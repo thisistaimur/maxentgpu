@@ -16,6 +16,19 @@ test_that("CPU fit has stable objective and link/raw predictions", {
   expect_equal(sum(fit$background_weights * predict(fit, fit$background, type = "raw")), 1, tolerance = 1e-8)
 })
 
+test_that("monotone FISTA agrees with non-accelerated proximal updates", {
+  x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
+  accelerated <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
+                            control = list(max_iter = 1000L, tol = 1e-9,
+                                           step = 1, accelerated = TRUE))
+  plain <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
+                      control = list(max_iter = 1000L, tol = 1e-9,
+                                     step = 1, accelerated = FALSE))
+  expect_true(all(diff(maxent_diagnostics(accelerated)$objective) <= 1e-10))
+  expect_equal(predict(accelerated, x, type = "raw"),
+               predict(plain, x, type = "raw"), tolerance = 1e-6)
+})
+
 test_that("weighted duplicate rows preserve the normalized objective", {
   presence <- data.frame(x1 = c(0, 0, 1))
   background <- data.frame(x1 = c(2, 3, 4))

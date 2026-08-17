@@ -76,19 +76,31 @@ maxent_fit <- function(x, presence, background = NULL,
   max_iter <- as.integer(control$max_iter %||% 2000L)
   tol <- as.numeric(control$tol %||% 1e-8)
   step <- as.numeric(control$step %||% 1)
+  accelerated <- isTRUE(control$accelerated %||% TRUE)
   if (max_iter < 1L || !is.finite(tol) || tol <= 0 || !is.finite(step) || step <= 0) stop("invalid solver control values.", call. = FALSE)
   beta <- numeric(ncol(presence_phi))
+  y <- beta
+  momentum <- 1
   values <- numeric(max_iter)
   converged <- FALSE
   for (iteration in seq_len(max_iter)) {
-    current <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
-    values[iteration] <- current$value
-    candidate <- beta - step * current$gradient
+    baseline <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+    values[iteration] <- baseline$value
+    current <- objective_components(y, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+    candidate <- y - step * current$gradient
     candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
     trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
-    while (trial$value > current$value && step > 1e-12) {
-      step <- step / 2
+    if (trial$value > baseline$value && accelerated) {
+      y <- beta
+      momentum <- 1
+      current <- baseline
       candidate <- beta - step * current$gradient
+      candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
+      trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+    }
+    while (trial$value > baseline$value && step > 1e-12) {
+      step <- step / 2
+      candidate <- y - step * current$gradient
       candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
       trial <- objective_components(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     }
@@ -97,7 +109,15 @@ maxent_fit <- function(x, presence, background = NULL,
       converged <- TRUE
       break
     }
+    previous <- beta
     beta <- candidate
+    if (accelerated) {
+      next_momentum <- (1 + sqrt(1 + 4 * momentum^2)) / 2
+      y <- beta + ((momentum - 1) / next_momentum) * (beta - previous)
+      momentum <- next_momentum
+    } else {
+      y <- beta
+    }
   }
   final <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
   values <- values[seq_len(iteration)]
