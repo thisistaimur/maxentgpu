@@ -5,6 +5,14 @@ test_that("L/Q feature specifications are immutable and deterministic", {
   expect_equal(unname(apply_feature_spec(spec, x)), unname(as.matrix(x)))
 })
 
+test_that("product features have deterministic pair ordering", {
+  x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 4, 1), x3 = c(2, 1, 3, 4))
+  fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "product")
+  spec <- maxent_feature_spec(fit)
+  expect_identical(spec$columns, c("P:x1*x2", "P:x1*x3", "P:x2*x3"))
+  expect_equal(unname(apply_feature_spec(spec, x)[1, ]), c(0, 0, 2))
+})
+
 test_that("CPU fit has stable objective and link/raw predictions", {
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   fit <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
@@ -48,7 +56,7 @@ test_that("invalid training inputs fail explicitly", {
                           presence_weights = c(1, 0)), "strictly positive")
   expect_error(maxent_fit(data.frame(x = c(1, 1)), c(TRUE, FALSE)), "constant")
   expect_error(maxent_fit(data.frame(x = c(1, 2)), c(TRUE, FALSE),
-                          features = "hinge"), "linear.*quadratic")
+                          features = "hinge"), "linear.*quadratic.*product")
   fit <- maxent_fit(data.frame(x = c(1, 2, 3)), c(TRUE, FALSE, FALSE), features = "linear")
   expect_error(predict(fit, data.frame(y = 1), type = "raw"), "missing predictors")
   expect_error(predict(fit, data.frame(x = 1), type = "cloglog"), "should be one of")

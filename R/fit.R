@@ -50,7 +50,7 @@ objective_components <- function(beta, presence_phi, background_phi, w, q, lambd
 #' @param background Optional numeric background predictor table.
 #' @param presence_weights Optional positive presence weights.
 #' @param background_weights Optional positive background weights.
-#' @param features Feature classes: `"linear"`, `"quadratic"`, or both.
+#' @param features Feature classes: `"linear"`, `"quadratic"`, `"product"`, or combinations.
 #' @param regularization A list with non-negative `lambda1` and `lambda2`, and
 #'   optional feature-specific non-negative `penalty_l1` and `penalty_l2` vectors.
 #' @param control A list with `max_iter`, `tol`, and `step`.

@@ -2,8 +2,9 @@ normalize_feature_classes <- function(classes) {
   classes <- tolower(classes)
   classes[classes %in% c("l", "linear")] <- "linear"
   classes[classes %in% c("q", "quadratic")] <- "quadratic"
-  if (!length(classes) || any(!classes %in% c("linear", "quadratic"))) {
-    stop("features must contain only 'linear' and/or 'quadratic'.", call. = FALSE)
+  classes[classes %in% c("p", "product", "pairwise")] <- "product"
+  if (!length(classes) || any(!classes %in% c("linear", "quadratic", "product"))) {
+    stop("features must contain only 'linear', 'quadratic', and/or 'product'.", call. = FALSE)
   }
   unique(classes)
 }
@@ -34,7 +35,13 @@ new_feature_spec <- function(x, classes = c("linear", "quadratic"), clamp = TRUE
     stop("constant predictors are not supported.", call. = FALSE)
   }
   columns <- unlist(lapply(classes, function(class) {
-    if (class == "linear") paste0("L:", colnames(x)) else paste0("Q:", colnames(x))
+    if (class == "linear") paste0("L:", colnames(x))
+    else if (class == "quadratic") paste0("Q:", colnames(x))
+    else if (ncol(x) < 2L) stop("product features require at least two predictors.", call. = FALSE)
+    else {
+      pairs <- utils::combn(colnames(x), 2L)
+      paste0("P:", pairs[1L, ], "*", pairs[2L, ])
+    }
   }), use.names = FALSE)
   structure(list(
     schema = "maxentgpu-features-v1",
@@ -62,8 +69,13 @@ apply_feature_spec <- function(spec, newdata, clamp = spec$clamp) {
   for (class in spec$classes) {
     if (class == "linear") {
       out[[length(out) + 1L]] <- x
-    } else {
+    } else if (class == "quadratic") {
       out[[length(out) + 1L]] <- x^2
+    } else {
+      pairs <- utils::combn(seq_len(ncol(x)), 2L)
+      out[[length(out) + 1L]] <- vapply(seq_len(ncol(pairs)), function(pair) {
+        x[, pairs[1L, pair]] * x[, pairs[2L, pair]]
+      }, numeric(nrow(x)))
     }
   }
   result <- do.call(cbind, out)
