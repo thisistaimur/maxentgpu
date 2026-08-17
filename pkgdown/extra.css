@@ -5,6 +5,7 @@
   --maxentgpu-teal: #249995;
   --maxentgpu-green: #58c95b;
   --maxentgpu-yellow: #f3d51b;
+  --maxentgpu-coral: #f06a78;
 }
 
 .navbar {
@@ -25,6 +26,11 @@
 .navbar .navbar-brand {
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.navbar .nav-text.text-muted {
+  color: var(--maxentgpu-coral) !important;
+  font-weight: 600;
 }
 
 .navbar .navbar-brand img {

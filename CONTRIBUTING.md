@@ -17,6 +17,7 @@ No task runner is required. Run commands from the repository root.
 | Generate documentation | `Rscript -e 'roxygen2::roxygenise()'` |
 | Build the documentation site | `Rscript tools/build-pkgdown.R .` |
 | Check hand fixtures | `Rscript tools/check-hand-fixtures.R .` |
+| Check reference fixture integrity | `Rscript tools/check-reference-fixtures.R .` |
 | Run unit tests | `Rscript -e 'testthat::test_local()'` |
 | Build source package | `R CMD build .` |
 | Check source package | `R CMD check --as-cran maxentgpu_*.tar.gz` |

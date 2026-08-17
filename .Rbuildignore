@@ -8,6 +8,8 @@
 ^LICENSE\.md$
 ^PLAN\.md$
 ^_pkgdown\.yml$
+^assets
+^pkgdown
 ^README\.Rmd$
 ^benchmarks$
 ^docs$
