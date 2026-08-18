@@ -2,6 +2,7 @@
 .RData
 .Rproj.user/
 .r-lib/
+.r-lib-*/
 .cache/
 docs/
 *.Rcheck/
