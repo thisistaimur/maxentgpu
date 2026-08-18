@@ -21,8 +21,9 @@ background_n <- as.integer(Sys.getenv("MAXENTGPU_BENCH_BACKGROUND", "2000"))
 presence_n <- as.integer(Sys.getenv("MAXENTGPU_BENCH_PRESENCE", "32"))
 repeats <- as.integer(Sys.getenv("MAXENTGPU_BENCH_REPEATS", "5"))
 chunk_size <- as.integer(Sys.getenv("MAXENTGPU_BENCH_CHUNK", "16"))
-if (any(!is.finite(c(species_n, background_n, presence_n, repeats, chunk_size))) ||
-    any(c(species_n, background_n, presence_n, repeats, chunk_size) < 1L)) {
+max_iter <- as.integer(Sys.getenv("MAXENTGPU_BENCH_MAX_ITER", "2000"))
+if (any(!is.finite(c(species_n, background_n, presence_n, repeats, chunk_size, max_iter))) ||
+    any(c(species_n, background_n, presence_n, repeats, chunk_size, max_iter) < 1L)) {
   stop("Benchmark sizes must be positive integers.", call. = FALSE)
 }
 
@@ -40,11 +41,11 @@ names(presence) <- sprintf("species_%03d", seq_len(species_n))
 batch <- maxentgpu::maxent_fit_batch(
   presence, background = background, features = "linear",
   regularization = list(lambda1 = 0, lambda2 = 0.4),
-  control = list(max_iter = 300L, tol = 1e-7,
+  control = list(max_iter = max_iter, tol = 1e-6, accelerated = FALSE,
                  engine = "torch", device = "cuda", dtype = "float64")
 )
 if (!all(batch$diagnostics$converged)) {
-  warning("Some species did not converge; see diagnostics in the output.")
+  stop("Benchmark requires all species to converge; increase MAXENTGPU_BENCH_MAX_ITER.", call. = FALSE)
 }
 
 sync <- function() if (isTRUE(torch::cuda_is_available())) torch::cuda_synchronize()
@@ -80,7 +81,7 @@ cat("CUDA batch prediction benchmark\n")
 cat("commit:", system("git rev-parse HEAD", intern = TRUE), "\n")
 cat("species:", species_n, "background:", background_n,
     "presence/species:", presence_n, "repeats:", repeats,
-    "chunk:", chunk_size, "\n")
+    "chunk:", chunk_size, "max_iter:", max_iter, "\n")
 cat("converged_species:", sum(batch$diagnostics$converged), "/", species_n, "\n")
 cat("max_abs_difference:", max(abs(dense - scalar)), "\n")
 cat("dense_cuda_median_seconds:", dense_time[["median"]], "\n")
