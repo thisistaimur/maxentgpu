@@ -622,8 +622,8 @@ to be beneficial.
 
 Tasks:
 
-- [ ] Define long/list batch inputs, validation, stable species ordering, and extraction
-  of single models.
+- [x] Define list batch inputs, validation, and stable species ordering.
+- [ ] Add extraction of single models from a batch object.
 - [ ] Implement shared-design batching for equal background and feature specs.
 - [ ] Implement species-specific presence indices/weights, penalties, convergence,
   early stopping masks, and failure reporting.
