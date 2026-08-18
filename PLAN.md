@@ -587,8 +587,9 @@ The CUDA half of the portability checkpoint is archived in
 `benchmarks/manifests/accelerator-checkpoint-cuda-a100.md`. It passed on a JUWELS
 Booster NVIDIA A100 using Torch 0.17.0 with the CUDA 12.8 runtime: 94 tests passed,
 none failed, and the two skips were MPS-unavailable checks. Gate 3 remains pending
-until the Apple Silicon/MPS checkpoint is archived; this CUDA result does not stand in
-for MPS validation.
+until the Apple Silicon/MPS checkpoint passes. The Mac attempt is recorded in
+`benchmarks/manifests/accelerator-checkpoint-mps-mac.md`: the arm64 runtime installed,
+but MPS was reported unavailable, so this result does not stand in for MPS validation.
 
 ### Phase 4 — GPU-batched independent-species fitting and prediction
 
