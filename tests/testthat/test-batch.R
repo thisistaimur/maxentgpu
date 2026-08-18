@@ -30,6 +30,20 @@ test_that("batch records can carry species-specific backgrounds and weights", {
   expect_equal(dim(predict(batch, data.frame(x = c(0, 1, 2)), type = "link")), c(3L, 2L))
 })
 
+test_that("shared-design batch prediction uses Torch matrix multiplication", {
+  skip_if_not_installed("torch")
+  background <- data.frame(x1 = c(0, 1, 2), x2 = c(1, 2, 3))
+  presence <- list(a = data.frame(x1 = c(0, 1), x2 = c(1, 2)),
+                  b = data.frame(x1 = c(1, 2), x2 = c(2, 3)))
+  batch <- maxent_fit_batch(presence, background = background, features = "linear",
+                            regularization = list(lambda1 = 0, lambda2 = 0.4),
+                            control = list(max_iter = 100L, tol = 1e-7))
+  newdata <- data.frame(x1 = c(0.5, 1.5), x2 = c(1.5, 2.5))
+  dense <- predict(batch, newdata, type = "link", device = "cpu", batch_size = 1L)
+  scalar <- do.call(cbind, lapply(batch$models, predict, newdata = newdata, type = "link"))
+  expect_equal(dense, scalar, tolerance = 1e-12)
+})
+
 test_that("batch rejects unstable or mismatched species IDs", {
   expect_error(maxent_fit_batch(list(data.frame(x = 1)), background = data.frame(x = 2)), "species")
   expect_error(maxent_fit_batch(list(a = data.frame(x = 1), b = data.frame(x = 2)),

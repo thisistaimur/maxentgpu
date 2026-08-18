@@ -628,6 +628,8 @@ Tasks:
 - [ ] Implement species-specific presence indices/weights, penalties, convergence,
   early stopping masks, and failure reporting.
 - [ ] Implement prediction as `X_new %*% t(beta)` in memory-bounded cell/species chunks.
+- [x] Implement shared-design Torch prediction as `X_new %*% t(beta)` with explicit
+  species chunking and CUDA device selection.
 - [ ] Add a planner using available memory minus a safety reserve; permit explicit
   overrides and log the chosen layout.
 - [ ] Group heterogeneous species by feature spec and regularization shape; fall back to
