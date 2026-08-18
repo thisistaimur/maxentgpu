@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-# End-to-end benchmark: independent scalar CPU fit+predict versus the current
-# CUDA batch API (which currently fits species independently and predicts densely).
+# End-to-end benchmark: independent scalar CPU Torch fit+predict versus the current
+# CUDA batch API. Using the same Torch engine isolates device performance.
 
 root <- if (length(commandArgs(trailingOnly = TRUE))) normalizePath(commandArgs(trailingOnly = TRUE)[[1L]]) else normalizePath(".")
 setwd(root)
@@ -26,7 +26,7 @@ presence <- lapply(seq_len(species_n), function(index) {
 names(presence) <- sprintf("species_%03d", seq_len(species_n))
 regularization <- list(lambda1 = 0, lambda2 = 0.4)
 control_cpu <- list(max_iter = max_iter, tol = 1e-6, accelerated = FALSE,
-                    engine = "analytic", device = "cpu", dtype = "float64")
+                    engine = "torch", device = "cpu", dtype = "float64")
 control_cuda <- list(max_iter = max_iter, tol = 1e-6, accelerated = FALSE,
                      engine = "torch", device = "cuda", dtype = "float64")
 
