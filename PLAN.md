@@ -558,6 +558,10 @@ Tasks:
 - [ ] Measure and remove accidental host/device transfers in the iteration loop.
 - [x] Add optional solver profiling that counts Torch objective evaluations and their
   host-synchronization points; use it to guide transfer removal.
+- Preliminary A100 profile: a small Torch CUDA fit performed 19 objective evaluations
+  and 19 counted host synchronizations, with 0.488 seconds accumulated in objective
+  evaluation. This confirms the transfer overhead hypothesis; it is not yet an
+  archived performance checkpoint because the tested commit was not captured.
 - [ ] Add synchronization only around benchmark timing and documented transfer points.
 - [ ] Add CUDA and MPS smoke workflows on controlled runners; other CI jobs skip
   unavailable accelerator tests with explicit reasons.
