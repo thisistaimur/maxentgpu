@@ -36,3 +36,21 @@ reference:
     contents:
       - maxent_device_probe
       - maxent_accelerators
+  - title: Feature construction
+    contents:
+      - maxent_feature_spec
+      - maxent_feature_matrix
+      - maxent_auto_features
+  - title: Scalar fitting and models
+    contents:
+      - maxent_fit
+      - predict.maxent_fit
+      - maxent_diagnostics
+      - maxent_coefficients
+      - summary.maxent_fit
+      - save_maxent_model
+      - read_maxent_model
+  - title: Independent-species batches
+    contents:
+      - maxent_fit_batch
+      - predict.maxent_batch_model
