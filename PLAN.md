@@ -642,6 +642,9 @@ Tasks:
 - [x] Run larger CUDA batch prediction measurements with fully converged fixtures;
   results and the no-speedup conclusion are archived in
   `benchmarks/manifests/cuda-batch-performance.md`.
+- [x] Run an end-to-end Torch CPU-versus-CUDA fit-plus-predict benchmark with matching
+  controls; results and the parity/no-speedup conclusion are archived in
+  `benchmarks/manifests/cuda-end-to-end-performance.md`.
 - [ ] Establish API freeze and add lifecycle/deprecation policy.
 
 Acceptance criteria:
