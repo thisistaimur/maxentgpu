@@ -94,6 +94,30 @@ torch_objective_components <- function(beta, presence_phi, background_phi, w, q,
   list(value = as.numeric(value$item()), gradient = as.numeric(beta_t$grad))
 }
 
+torch_objective_factory <- function(presence_phi, background_phi, w, q, lambda1, lambda2,
+                                    r1, r2, device = "cpu", dtype = "float64") {
+  if (!requireNamespace("torch", quietly = TRUE)) stop("torch is required for the autograd oracle.", call. = FALSE)
+  torch_dtype <- if (identical(dtype, "float32")) torch::torch_float32() else torch::torch_float64()
+  presence_t <- torch::torch_tensor(presence_phi, dtype = torch_dtype, device = device)
+  background_t <- torch::torch_tensor(background_phi, dtype = torch_dtype, device = device)
+  w_t <- torch::torch_tensor(w, dtype = torch_dtype, device = device)
+  q_t <- torch::torch_tensor(q, dtype = torch_dtype, device = device)
+  r1_t <- torch::torch_tensor(r1, dtype = torch_dtype, device = device)
+  r2_t <- torch::torch_tensor(r2, dtype = torch_dtype, device = device)
+  function(beta) {
+    beta_t <- torch::torch_tensor(beta, dtype = torch_dtype, device = device, requires_grad = TRUE)
+    z_presence <- presence_t$matmul(beta_t)
+    z_background <- background_t$matmul(beta_t)
+    logz <- torch::torch_logsumexp(torch::torch_log(q_t) + z_background, dim = 1)
+    smooth <- logz - (w_t * z_presence)$sum()
+    penalty <- lambda1 * (r1_t * torch::torch_abs(beta_t))$sum() +
+      0.5 * lambda2 * (r2_t * beta_t^2)$sum()
+    value <- smooth + penalty
+    value$backward()
+    list(value = as.numeric(value$item()), gradient = as.numeric(beta_t$grad))
+  }
+}
+
 #' Fit a scalar CPU maximum-entropy model
 #'
 #' @param x Numeric presence predictors when `background` is supplied, or a
@@ -175,11 +199,13 @@ maxent_fit <- function(x, presence, background = NULL,
   accelerated <- isTRUE(control$accelerated %||% TRUE)
   profile <- isTRUE(control$profile %||% FALSE)
   objective_impl <- if (execution$engine == "torch") {
+    torch_eval <- torch_objective_factory(
+      presence_phi, background_phi, w, q, lambda1, lambda2,
+      spec$penalty_l1, spec$penalty_l2,
+      device = execution$device, dtype = execution$dtype
+    )
     function(beta_value, ...) {
-      result <- torch_objective_components(beta = beta_value, ..., device = execution$device,
-                                           dtype = execution$dtype)
-      analytic <- objective_components(beta = beta_value, ...)
-      analytic[c("smooth", "logz", "pi", "gradient")] <- NULL
+      result <- torch_eval(beta_value)
       list(value = result$value, gradient = result$gradient,
            smooth = NA_real_, logz = NA_real_, pi = NULL)
     }
