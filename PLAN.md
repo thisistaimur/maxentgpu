@@ -639,6 +639,9 @@ Tasks:
   unequal presence counts, weights, missing species, and partial extraction.
 - [x] Verify shared-design CUDA batch predictions against independent scalar predictions
   for a two-species A100 smoke fixture; the archived maximum absolute difference is 0.
+- [x] Run larger CUDA batch prediction measurements with fully converged fixtures;
+  results and the no-speedup conclusion are archived in
+  `benchmarks/manifests/cuda-batch-performance.md`.
 - [ ] Establish API freeze and add lifecycle/deprecation policy.
 
 Acceptance criteria:
