@@ -591,6 +591,14 @@ until the Apple Silicon/MPS checkpoint passes. The Mac attempt is recorded in
 `benchmarks/manifests/accelerator-checkpoint-mps-mac.md`: the arm64 runtime installed,
 but MPS was reported unavailable, so this result does not stand in for MPS validation.
 
+#### CUDA-first scope decision
+
+The current development and validation route is CUDA-first. MPS validation is
+explicitly deferred because the available R Torch/LibTorch arm64 runtime is
+incompatible with the development Mac's macOS version. CUDA results may support
+CUDA-specific claims, but must not be presented as complete CPU/CUDA/MPS parity until
+an MPS checkpoint is independently green.
+
 ### Phase 4 — GPU-batched independent-species fitting and prediction
 
 **Goal:** make species count a tensor batch dimension while preserving independent
