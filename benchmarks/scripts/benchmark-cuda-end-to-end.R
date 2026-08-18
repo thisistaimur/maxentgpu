@@ -14,8 +14,13 @@ presence_n <- as.integer(Sys.getenv("MAXENTGPU_E2E_PRESENCE", "64"))
 repeats <- as.integer(Sys.getenv("MAXENTGPU_E2E_REPEATS", "3"))
 max_iter <- as.integer(Sys.getenv("MAXENTGPU_E2E_MAX_ITER", "1000"))
 native <- identical(toupper(Sys.getenv("MAXENTGPU_E2E_NATIVE", "FALSE")), "TRUE")
-if (any(!is.finite(c(species_n, background_n, presence_n, repeats, max_iter))) ||
-    any(c(species_n, background_n, presence_n, repeats, max_iter) < 1L)) stop("Benchmark sizes must be positive.", call. = FALSE)
+fit_tol <- as.numeric(Sys.getenv("MAXENTGPU_E2E_TOL", "1e-8"))
+parity_tol <- as.numeric(Sys.getenv("MAXENTGPU_E2E_PARITY_TOL", "1e-7"))
+diagnostic_interval <- as.integer(Sys.getenv("MAXENTGPU_E2E_DIAGNOSTIC_INTERVAL", "5"))
+if (any(!is.finite(c(species_n, background_n, presence_n, repeats, max_iter,
+                     fit_tol, parity_tol, diagnostic_interval))) ||
+    any(c(species_n, background_n, presence_n, repeats, max_iter,
+          fit_tol, parity_tol, diagnostic_interval) < 1)) stop("Benchmark controls must be positive.", call. = FALSE)
 
 background <- data.frame(x1 = seq(-2, 2, length.out = background_n),
                          x2 = cos(seq(-2, 2, length.out = background_n) * 1.7))
@@ -26,11 +31,11 @@ presence <- lapply(seq_len(species_n), function(index) {
 })
 names(presence) <- sprintf("species_%03d", seq_len(species_n))
 regularization <- list(lambda1 = 0, lambda2 = 0.4)
-control_cpu <- list(max_iter = max_iter, tol = 1e-6, accelerated = FALSE,
+control_cpu <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                     engine = "torch", device = "cpu", dtype = "float64")
-control_cuda <- list(max_iter = max_iter, tol = 1e-6, accelerated = FALSE,
+control_cuda <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                      engine = "torch", device = "cuda", dtype = "float64",
-                     native = native, diagnostic_interval = 25L)
+                     native = native, diagnostic_interval = diagnostic_interval)
 
 sync <- function() torch::cuda_synchronize()
 run_cpu <- function() {
@@ -65,8 +70,11 @@ cpu <- measure(run_cpu)
 cat("CUDA end-to-end fit-plus-predict benchmark\n")
 cat("commit:", system("git rev-parse HEAD", intern = TRUE), "\n")
 cat("species:", species_n, "background:", background_n, "presence/species:", presence_n,
-    "repeats:", repeats, "max_iter:", max_iter, "native:", native, "\n")
-cat("max_abs_difference:", max(abs(cuda$result - cpu$result)), "\n")
+    "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
+    "diagnostic_interval:", diagnostic_interval, "native:", native, "\n")
+max_difference <- max(abs(cuda$result - cpu$result))
+if (max_difference > parity_tol) stop("fit-plus-predict parity exceeded MAXENTGPU_E2E_PARITY_TOL.", call. = FALSE)
+cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n")
 cat("cuda_median_seconds:", cuda$time[["median"]], "\n")
 cat("cuda_min_seconds:", cuda$time[["min"]], "\n")
 cat("cuda_max_seconds:", cuda$time[["max"]], "\n")
