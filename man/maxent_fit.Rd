@@ -43,7 +43,9 @@ optional feature-specific non-negative \code{penalty_l1} and \code{penalty_l2} v
 \item{control}{A list with \code{max_iter}, \code{tol}, \code{step}, optional \code{device},
 \code{dtype}, \code{engine} (\code{"analytic"} or \code{"torch"}), \code{accelerated}, and
 \code{profile} (to collect objective timing and host-synchronization counts).
-Set \code{native = TRUE} for the experimental fixed-step Torch-native mode;
+Set \code{native = TRUE} for the experimental Torch-native mode. By default it
+uses objective backtracking for improved numerical agreement; set
+\code{native_method = "fixed"} to use the earlier fixed-step method.
 it currently requires \code{engine = "torch"}, \code{lambda1 = 0}, and
 \code{accelerated = FALSE}.}
 }

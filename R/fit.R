@@ -119,7 +119,8 @@ torch_objective_factory <- function(presence_phi, background_phi, w, q, lambda1,
 }
 
 torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
-                               device, dtype, max_iter, step, tol, diagnostic_interval) {
+                               device, dtype, max_iter, step, tol, diagnostic_interval,
+                               method = "backtracking") {
   torch_dtype <- if (identical(dtype, "float32")) torch::torch_float32() else torch::torch_float64()
   presence_t <- torch::torch_tensor(presence_phi, dtype = torch_dtype, device = device)
   background_t <- torch::torch_tensor(background_phi, dtype = torch_dtype, device = device)
@@ -131,6 +132,7 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
   previous <- beta
   converged <- FALSE
   parameter_change <- Inf
+  method <- match.arg(method, c("backtracking", "fixed"))
   for (iteration in seq_len(max_iter)) {
     beta <- beta$detach()$requires_grad_(TRUE)
     z_presence <- presence_t$matmul(beta)
@@ -138,7 +140,22 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
     logz <- torch::torch_logsumexp(torch::torch_log(q_t) + z_background, dim = 1)
     value <- logz - (w_t * z_presence)$sum() + 0.5 * lambda2 * (r2_t * beta^2)$sum()
     value$backward()
-    candidate <- torch::with_no_grad({ beta - step * beta$grad })
+    step_size <- step
+    candidate <- torch::with_no_grad({ beta - step_size * beta$grad })
+    if (identical(method, "backtracking")) {
+      value_host <- as.numeric(value$item())
+      repeat {
+        candidate_value <- torch::with_no_grad({
+          candidate_z <- background_t$matmul(candidate)
+          candidate_logz <- torch::torch_logsumexp(torch::torch_log(q_t) + candidate_z, dim = 1)
+          candidate_logz - (w_t * presence_t$matmul(candidate))$sum() +
+            0.5 * lambda2 * (r2_t * candidate^2)$sum()
+        })
+        if (as.numeric(candidate_value$item()) <= value_host || step_size <= 1e-12) break
+        step_size <- step_size / 2
+        candidate <- torch::with_no_grad({ beta - step_size * beta$grad })
+      }
+    }
     if (iteration %% diagnostic_interval == 0L || iteration == max_iter) {
       values[[iteration]] <- as.numeric(value$item())
       parameter_change <- max(abs(as.numeric((candidate - beta)$to(device = "cpu"))))
@@ -174,7 +191,9 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
 #' @param control A list with `max_iter`, `tol`, `step`, optional `device`,
 #'   `dtype`, `engine` (`"analytic"` or `"torch"`), `accelerated`, and
 #'   `profile` (to collect objective timing and host-synchronization counts).
-#'   Set `native = TRUE` for the experimental fixed-step Torch-native mode;
+#'   Set `native = TRUE` for the experimental Torch-native mode. By default it
+#'   uses objective backtracking for improved numerical agreement; set
+#'   `native_method = "fixed"` to use the earlier fixed-step method.
 #'   it currently requires `engine = "torch"`, `lambda1 = 0`, and
 #'   `accelerated = FALSE`.
 #' @return An object of class `maxent_fit`.
@@ -266,12 +285,17 @@ maxent_fit <- function(x, presence, background = NULL,
   if (native && lambda1 != 0) stop("control native currently requires lambda1 = 0.", call. = FALSE)
   if (native && accelerated) stop("control native currently requires accelerated = FALSE.", call. = FALSE)
   diagnostic_interval <- as.integer(control$diagnostic_interval %||% 25L)
+  native_method <- as.character(control$native_method %||% "backtracking")
+  if (length(native_method) != 1L || !native_method %in% c("backtracking", "fixed")) {
+    stop("native_method must be 'backtracking' or 'fixed'.", call. = FALSE)
+  }
   if (native && (length(diagnostic_interval) != 1L || is.na(diagnostic_interval) || diagnostic_interval < 1L)) {
     stop("diagnostic_interval must be a positive integer.", call. = FALSE)
   }
   native_result <- if (native) torch_native_solve(
     presence_phi, background_phi, w, q, lambda2, spec$penalty_l2,
-    execution$device, execution$dtype, max_iter, step, tol, diagnostic_interval
+    execution$device, execution$dtype, max_iter, step, tol, diagnostic_interval,
+    method = native_method
   ) else NULL
   beta <- if (is.null(native_result)) numeric(ncol(presence_phi)) else native_result$beta
   y <- beta

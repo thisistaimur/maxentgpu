@@ -269,3 +269,24 @@ test_that("experimental Torch-native solver keeps optimization state off the hos
   expect_gt(maxent_diagnostics(fit)$profile$host_synchronizations, 0L)
   expect_lt(max(abs(fit$beta)), 10)
 })
+
+test_that("Torch-native backtracking agrees with the regular Torch solver", {
+  skip_if_not_installed("torch")
+  x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
+  native <- maxent_fit(
+    x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
+    regularization = list(lambda1 = 0, lambda2 = 0.4),
+    control = list(max_iter = 2000L, tol = 1e-10, engine = "torch",
+                   native = TRUE, accelerated = FALSE,
+                   native_method = "backtracking", diagnostic_interval = 10L)
+  )
+  reference <- maxent_fit(
+    x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
+    regularization = list(lambda1 = 0, lambda2 = 0.4),
+    control = list(max_iter = 2000L, tol = 1e-10, engine = "torch",
+                   accelerated = FALSE)
+  )
+  expect_true(maxent_diagnostics(native)$converged)
+  expect_equal(predict(native, x, type = "link"),
+               predict(reference, x, type = "link"), tolerance = 1e-7)
+})

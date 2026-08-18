@@ -558,9 +558,15 @@ Tasks:
 - [ ] Measure and remove accidental host/device transfers in the iteration loop.
 - [x] Add optional solver profiling that counts Torch objective evaluations and their
   host-synchronization points; use it to guide transfer removal.
-- [x] Add an experimental fixed-step Torch-native solver mode for L2-only fits with
-  configurable diagnostic intervals; it keeps optimizer state on the selected device
-  but is not yet the default or a full proximal/FISTA replacement.
+- [x] Add an experimental Torch-native solver mode for L2-only fits with configurable
+  diagnostic intervals. It now defaults to objective-backtracking updates for improved
+  numerical agreement; `native_method = "fixed"` preserves the earlier fixed-step mode.
+  Both modes keep optimizer state on the selected device but are not yet the default
+  solver or a full proximal/FISTA replacement.
+- [ ] Re-run the native CUDA end-to-end checkpoint after backtracking. The previous
+  fixed-step mode plateaued at approximately `1.28e-5` prediction error against the
+  regular Torch CPU solver, above the declared `1e-7` parity gate; that result is not
+  an accepted performance checkpoint.
 - Preliminary A100 profile: a small Torch CUDA fit initially performed 19 objective
   evaluations and 19 counted host synchronizations, with 0.488 seconds accumulated
   in objective evaluation. After caching static Torch tensors, the same profile
