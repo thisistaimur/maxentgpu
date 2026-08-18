@@ -40,3 +40,9 @@ The Apple Silicon LibTorch and Lantern archives installed successfully, but the
 runtime does not expose MPS on this host. This is a pending portability checkpoint,
 not a green MPS result. Gate 3 remains open until an Apple Silicon environment with
 `mps` reported available can run the parity manifest.
+
+The host reports an Apple M1 Pro with Metal support. A direct smoke operation,
+`torch::torch_tensor(1, device = "mps")`, failed inside the bundled LibTorch 2.8.0
+runtime with `The MPS backend is supported on MacOS 13.0+`, despite this host running
+macOS 26.5.1. This indicates an upstream LibTorch/Torch runtime compatibility issue;
+it is not evidence that the package silently fell back to CPU.
