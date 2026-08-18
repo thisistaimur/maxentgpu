@@ -20,7 +20,9 @@ diagnostic_interval <- as.integer(Sys.getenv("MAXENTGPU_E2E_DIAGNOSTIC_INTERVAL"
 if (any(!is.finite(c(species_n, background_n, presence_n, repeats, max_iter,
                      fit_tol, parity_tol, diagnostic_interval))) ||
     any(c(species_n, background_n, presence_n, repeats, max_iter,
-          fit_tol, parity_tol, diagnostic_interval) < 1)) stop("Benchmark controls must be positive.", call. = FALSE)
+          diagnostic_interval) < 1) || any(c(fit_tol, parity_tol) <= 0)) {
+  stop("Benchmark controls must be positive.", call. = FALSE)
+}
 
 background <- data.frame(x1 = seq(-2, 2, length.out = background_n),
                          x2 = cos(seq(-2, 2, length.out = background_n) * 1.7))
