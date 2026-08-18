@@ -637,6 +637,8 @@ Tasks:
 - [ ] Ensure one failed/non-convergent species does not corrupt successful species.
 - [ ] Add scalar-vs-batch metamorphic tests on CPU/CUDA/MPS, including reordered species,
   unequal presence counts, weights, missing species, and partial extraction.
+- [x] Verify shared-design CUDA batch predictions against independent scalar predictions
+  for a two-species A100 smoke fixture; the archived maximum absolute difference is 0.
 - [ ] Establish API freeze and add lifecycle/deprecation policy.
 
 Acceptance criteria:
