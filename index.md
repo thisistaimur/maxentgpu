@@ -1,26 +1,58 @@
 # maxentgpu
 
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![CI /
 Release](https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml/badge.svg)](https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml)
 [![pkgdown](https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml)
+[![GitHub
+release](https://img.shields.io/github/v/release/thisistaimur/maxentgpu?include_prereleases&label=GitHub%20release)](https://github.com/thisistaimur/maxentgpu/releases)
 
-`maxentgpu` is an experimental R package for auditable maximum-entropy
-presence-background models implemented with Torch operations. The
-project is in Phase 0: its mathematical and reference contracts are
-being made executable before model fitting or performance work begins.
+`maxentgpu` is an R package for auditable maximum-entropy
+presence-background models implemented with Torch operations. It
+provides backend diagnostics today, with model fitting and prediction
+capabilities under active development.
 
-The only current user-facing operation is a backend diagnostic:
+## Installation
+
+`maxentgpu` is not yet available on CRAN. Install the development
+version from GitHub with:
 
 ``` r
 
-maxentgpu::maxent_device_probe()
+install.packages("remotes")
+remotes::install_github("thisistaimur/maxentgpu")
 ```
 
-CUDA, MPS, batching, raster prediction, and claims of Java MaxEnt
-compatibility are not yet released features. See `PLAN.md` and
-`inst/spec/` for the staged contract.
+The package currently requires R (\>= 4.3.0) and uses the `torch`
+package for backend diagnostics. See the [documentation
+website](https://thisistaimur.github.io/maxentgpu/) for the API
+reference and installation details.
 
-Development documentation is published at
-<https://thisistaimur.github.io/maxentgpu/>. GitHub releases are
-generated from successful `main` builds; CRAN submission remains a
-separate maintainer-reviewed process.
+## Examples
+
+The backend diagnostic reports which Torch devices can execute a real
+tensor smoke test:
+
+``` r
+
+library(maxentgpu)
+
+maxent_device_probe()
+maxent_accelerators()
+```
+
+Model fitting, batching, raster prediction, and additional accelerator
+support are being added incrementally. The current release is intended
+for development and evaluation rather than production model fitting.
+
+## Contributing
+
+See the [contributing
+guide](https://thisistaimur.github.io/maxentgpu/CONTRIBUTING.md) for
+setup instructions, fixture provenance, documentation commands, and
+testing guidance.
+
+GitHub releases are generated from successful `main` builds. CRAN
+submission remains a separate maintainer-reviewed process; see
+`CRAN-READINESS.md`.

@@ -1,8 +1,7 @@
 # Contributing to maxentgpu
 
-Work follows the phases and STOP/GO gates in `PLAN.md`. Preserve
-unrelated changes, make the smallest coherent vertical slice, and record
-exact verification commands and results. Never weaken a numerical
+Preserve unrelated changes, make the smallest coherent change, and
+record exact verification commands and results. Never weaken a numerical
 tolerance or regenerate golden files merely to make a check pass.
 
 Files under `sources/` are synchronized, read-only reference material
@@ -18,6 +17,9 @@ No task runner is required. Run commands from the repository root.
 | Generate documentation | `Rscript -e 'roxygen2::roxygenise()'` |
 | Build the documentation site | `Rscript tools/build-pkgdown.R .` |
 | Check hand fixtures | `Rscript tools/check-hand-fixtures.R .` |
+| Check reference fixture integrity | `Rscript tools/check-reference-fixtures.R .` |
+| Compare package-native fit with pinned maxnet fixture | `Rscript tools/compare-reference-fixtures.R .` |
+| Calibrate diagnostic regularization scale | `Rscript tools/calibrate-reference-regularization.R .` (LQ) or append `linear_` (L) |
 | Run unit tests | `Rscript -e 'testthat::test_local()'` |
 | Build source package | `R CMD build .` |
 | Check source package | `R CMD check --as-cran maxentgpu_*.tar.gz` |
@@ -29,12 +31,12 @@ Reference fixture regeneration is an explicit maintainer action. Review
 inputs, versions, commands, output diffs, and provenance together. Do
 not commit `maxent.jar` or opaque benchmark binaries.
 
-## Accelerator checkpoint
+## Accelerator testing
 
-During Phase 3, archive CPU/MPS results from the Apple Silicon
-development machine and CPU/CUDA results from a clean checkout on the
-DGX Spark using the same pinned manifest. A skipped backend leaves Gate
-3 pending.
+When accelerator support is tested, archive CPU/MPS results from the
+Apple Silicon development machine and CPU/CUDA results from a clean
+checkout on the DGX Spark using the same pinned manifest. Record skipped
+or unavailable backends explicitly.
 
 ## API documentation and website
 

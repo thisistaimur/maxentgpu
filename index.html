@@ -6,15 +6,22 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Maximum-Entropy Presence-Background Models with Torch • maxentgpu</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Maximum-Entropy Presence-Background Models with Torch">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Maximum-Entropy Presence-Background Models with Torch">
 <meta name="description" content="Auditable maximum-entropy presence-background models on CPU and supported Torch accelerators.
 ">
 <meta property="og:description" content="Auditable maximum-entropy presence-background models on CPU and supported Torch accelerators.
 ">
+<meta property="og:image" content="https://thisistaimur.github.io/maxentgpu/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -24,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">maxentgpu</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,9 +44,6 @@
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><form class="form-inline" role="search">
- <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
-</form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/thisistaimur/maxentgpu/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
@@ -49,15 +53,39 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="maxentgpu">maxentgpu<a class="anchor" aria-label="anchor" href="#maxentgpu"></a>
-</h1></div>
-<p><a href="https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml" class="external-link"><img src="https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml/badge.svg" alt="CI / Release"></a> <a href="https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></p>
-<p><code>maxentgpu</code> is an experimental R package for auditable maximum-entropy presence-background models implemented with Torch operations. The project is in Phase 0: its mathematical and reference contracts are being made executable before model fitting or performance work begins.</p>
-<p>The only current user-facing operation is a backend diagnostic:</p>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="maxentgpu-">maxentgpu 
+<a class="anchor" aria-label="anchor" href="#maxentgpu-"></a>
+</h1>
+</div>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml" class="external-link"><img src="https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml/badge.svg" alt="CI / Release"></a> <a href="https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <a href="https://github.com/thisistaimur/maxentgpu/releases" class="external-link"><img src="https://img.shields.io/github/v/release/thisistaimur/maxentgpu?include_prereleases&amp;label=GitHub%20release" alt="GitHub release"></a></p>
+<p><code>maxentgpu</code> is an R package for auditable maximum-entropy presence-background models implemented with Torch operations. It provides backend diagnostics today, with model fitting and prediction capabilities under active development.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p><code>maxentgpu</code> is not yet available on CRAN. Install the development version from GitHub with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">maxentgpu</span><span class="fu">::</span><span class="fu"><a href="reference/maxent_device_probe.html">maxent_device_probe</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>CUDA, MPS, batching, raster prediction, and claims of Java MaxEnt compatibility are not yet released features. See <code>PLAN.md</code> and <code>inst/spec/</code> for the staged contract.</p>
-<p>Development documentation is published at <a href="https://thisistaimur.github.io/maxentgpu/" class="uri">https://thisistaimur.github.io/maxentgpu/</a>. GitHub releases are generated from successful <code>main</code> builds; CRAN submission remains a separate maintainer-reviewed process.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"thisistaimur/maxentgpu"</span><span class="op">)</span></span></code></pre></div>
+<p>The package currently requires R (&gt;= 4.3.0) and uses the <code>torch</code> package for backend diagnostics. See the <a href="https://thisistaimur.github.io/maxentgpu/">documentation website</a> for the API reference and installation details.</p>
+</div>
+<div class="section level2">
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h2>
+<p>The backend diagnostic reports which Torch devices can execute a real tensor smoke test:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thisistaimur/maxentgpu" class="external-link">maxentgpu</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/maxent_device_probe.html">maxent_device_probe</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/maxent_accelerators.html">maxent_accelerators</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Model fitting, batching, raster prediction, and additional accelerator support are being added incrementally. The current release is intended for development and evaluation rather than production model fitting.</p>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>See the <a href="CONTRIBUTING.html">contributing guide</a> for setup instructions, fixture provenance, documentation commands, and testing guidance.</p>
+<p>GitHub releases are generated from successful <code>main</code> builds. CRAN submission remains a separate maintainer-reviewed process; see <code>CRAN-READINESS.md</code>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
