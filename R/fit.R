@@ -350,7 +350,7 @@ maxent_fit <- function(x, presence, background = NULL,
                                     engine = execution$engine,
                                     profile = list(enabled = profile || native,
                                                    objective_evaluations = objective_evaluations,
-                                                   objective_seconds = objective_seconds,
+                                                   objective_seconds = if (native) NA_real_ else objective_seconds,
                                                    host_synchronizations = if (execution$engine == "torch") objective_evaluations else 0L))),
             class = "maxent_fit")
 }
