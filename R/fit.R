@@ -132,6 +132,7 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
   previous <- beta
   converged <- FALSE
   parameter_change <- Inf
+  gradient_norm <- Inf
   method <- match.arg(method, c("backtracking", "fixed"))
   for (iteration in seq_len(max_iter)) {
     beta <- beta$detach()$requires_grad_(TRUE)
@@ -159,7 +160,8 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
     if (iteration %% diagnostic_interval == 0L || iteration == max_iter) {
       values[[iteration]] <- as.numeric(value$item())
       parameter_change <- max(abs(as.numeric((candidate - beta)$to(device = "cpu"))))
-      if (parameter_change <= tol) {
+      gradient_norm <- max(abs(as.numeric(beta$grad$to(device = "cpu"))))
+      if (parameter_change <= tol && gradient_norm <= tol) {
         beta <- candidate
         converged <- TRUE
         break
@@ -170,7 +172,7 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
   }
   list(beta = as.numeric(beta$to(device = "cpu")), values = values[seq_len(iteration)],
        iterations = iteration, converged = converged,
-       parameter_change = parameter_change)
+       parameter_change = parameter_change, gradient_norm = gradient_norm)
 }
 
 #' Fit a scalar CPU maximum-entropy model
@@ -350,14 +352,17 @@ maxent_fit <- function(x, presence, background = NULL,
     iteration <- native_result$iterations
     values <- native_result$values
     converged <- native_result$converged
-    stop_reason <- if (converged) "parameter_change" else "max_iter"
+    stop_reason <- if (converged) "parameter_and_gradient_change" else "max_iter"
     parameter_change <- native_result$parameter_change
+    smooth_gradient_norm <- native_result$gradient_norm
     objective_evaluations <- ceiling(iteration / diagnostic_interval)
   }
   final <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
   if (!converged || !is.null(native_result)) {
     parameter_change <- if (is.finite(parameter_change)) parameter_change else NA_real_
-    smooth_gradient_norm <- max(abs(final$gradient - lambda2 * spec$penalty_l2 * beta))
+    if (is.null(native_result)) {
+      smooth_gradient_norm <- max(abs(final$gradient - lambda2 * spec$penalty_l2 * beta))
+    }
   }
   values <- values[seq_len(iteration)]
   structure(list(beta = beta, feature_spec = spec, presence = presence_x,
