@@ -556,6 +556,8 @@ Tasks:
   tests; unavailable accelerators skip with an explicit reason.
 - [ ] Test extreme logits and memory errors with actionable messages.
 - [ ] Measure and remove accidental host/device transfers in the iteration loop.
+- [x] Add optional solver profiling that counts Torch objective evaluations and their
+  host-synchronization points; use it to guide transfer removal.
 - [ ] Add synchronization only around benchmark timing and documented transfer points.
 - [ ] Add CUDA and MPS smoke workflows on controlled runners; other CI jobs skip
   unavailable accelerator tests with explicit reasons.

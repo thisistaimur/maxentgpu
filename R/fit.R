@@ -110,7 +110,8 @@ torch_objective_components <- function(beta, presence_phi, background_phi, w, q,
 #' @param regularization A list with non-negative `lambda1` and `lambda2`, and
 #'   optional feature-specific non-negative `penalty_l1` and `penalty_l2` vectors.
 #' @param control A list with `max_iter`, `tol`, `step`, optional `device`,
-#'   `dtype`, `engine` (`"analytic"` or `"torch"`), and `accelerated`.
+#'   `dtype`, `engine` (`"analytic"` or `"torch"`), `accelerated`, and
+#'   `profile` (to collect objective timing and host-synchronization counts).
 #' @return An object of class `maxent_fit`.
 #' @export
 maxent_fit <- function(x, presence, background = NULL,
@@ -172,7 +173,8 @@ maxent_fit <- function(x, presence, background = NULL,
   step <- as.numeric(control$step %||% 1)
   execution <- normalize_execution(control)
   accelerated <- isTRUE(control$accelerated %||% TRUE)
-  objective_eval <- if (execution$engine == "torch") {
+  profile <- isTRUE(control$profile %||% FALSE)
+  objective_impl <- if (execution$engine == "torch") {
     function(beta_value, ...) {
       result <- torch_objective_components(beta = beta_value, ..., device = execution$device,
                                            dtype = execution$dtype)
@@ -182,6 +184,15 @@ maxent_fit <- function(x, presence, background = NULL,
            smooth = NA_real_, logz = NA_real_, pi = NULL)
     }
   } else objective_components
+  objective_evaluations <- 0L
+  objective_seconds <- 0
+  objective_eval <- function(...) {
+    objective_evaluations <<- objective_evaluations + 1L
+    started <- if (profile) proc.time()[["elapsed"]] else 0
+    result <- objective_impl(...)
+    if (profile) objective_seconds <<- objective_seconds + proc.time()[["elapsed"]] - started
+    result
+  }
   if (max_iter < 1L || !is.finite(tol) || tol <= 0 || !is.finite(step) || step <= 0) stop("invalid solver control values.", call. = FALSE)
   beta <- numeric(ncol(presence_phi))
   y <- beta
@@ -249,7 +260,11 @@ maxent_fit <- function(x, presence, background = NULL,
                                     smooth_gradient_norm = smooth_gradient_norm,
                                     stop_reason = stop_reason,
                                     device = execution$device, dtype = execution$dtype,
-                                    engine = execution$engine)),
+                                    engine = execution$engine,
+                                    profile = list(enabled = profile,
+                                                   objective_evaluations = objective_evaluations,
+                                                   objective_seconds = objective_seconds,
+                                                   host_synchronizations = if (execution$engine == "torch") objective_evaluations else 0L))),
             class = "maxent_fit")
 }
 

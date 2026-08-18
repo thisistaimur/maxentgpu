@@ -246,3 +246,14 @@ test_that("Torch solver engine matches the analytic CPU engine", {
   expect_lt(max(abs((torch_raw - analytic_raw) / analytic_raw)), 1e-4)
   expect_identical(maxent_diagnostics(torch_fit)$engine, "torch")
 })
+
+test_that("optional solver profiling reports objective evaluation counts", {
+  fit <- maxent_fit(data.frame(x = c(0, 1, 2, 3)), c(TRUE, TRUE, FALSE, FALSE),
+                    features = "linear",
+                    control = list(max_iter = 20L, tol = 1e-6, profile = TRUE))
+  profile <- maxent_diagnostics(fit)$profile
+  expect_true(profile$enabled)
+  expect_gte(profile$objective_evaluations, 1L)
+  expect_equal(profile$host_synchronizations, 0L)
+  expect_gte(profile$objective_seconds, 0)
+})

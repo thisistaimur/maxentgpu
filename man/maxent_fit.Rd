@@ -41,7 +41,8 @@ presence predictor table when \code{background} is supplied.}
 optional feature-specific non-negative \code{penalty_l1} and \code{penalty_l2} vectors.}
 
 \item{control}{A list with \code{max_iter}, \code{tol}, \code{step}, optional \code{device},
-\code{dtype}, \code{engine} (\code{"analytic"} or \code{"torch"}), and \code{accelerated}.}
+\code{dtype}, \code{engine} (\code{"analytic"} or \code{"torch"}), \code{accelerated}, and
+\code{profile} (to collect objective timing and host-synchronization counts).}
 }
 \value{
 An object of class \code{maxent_fit}.
