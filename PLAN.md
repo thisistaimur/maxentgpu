@@ -558,6 +558,9 @@ Tasks:
 - [ ] Measure and remove accidental host/device transfers in the iteration loop.
 - [x] Add optional solver profiling that counts Torch objective evaluations and their
   host-synchronization points; use it to guide transfer removal.
+- [x] Add an experimental fixed-step Torch-native solver mode for L2-only fits with
+  configurable diagnostic intervals; it keeps optimizer state on the selected device
+  but is not yet the default or a full proximal/FISTA replacement.
 - Preliminary A100 profile: a small Torch CUDA fit initially performed 19 objective
   evaluations and 19 counted host synchronizations, with 0.488 seconds accumulated
   in objective evaluation. After caching static Torch tensors, the same profile

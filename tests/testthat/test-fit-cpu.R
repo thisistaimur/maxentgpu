@@ -257,3 +257,15 @@ test_that("optional solver profiling reports objective evaluation counts", {
   expect_equal(profile$host_synchronizations, 0L)
   expect_gte(profile$objective_seconds, 0)
 })
+
+test_that("experimental Torch-native solver keeps optimization state off the host", {
+  fit <- maxent_fit(data.frame(x = c(0, 1, 2, 3)), c(TRUE, TRUE, FALSE, FALSE),
+                    features = "linear",
+                    regularization = list(lambda1 = 0, lambda2 = 0.4),
+                    control = list(max_iter = 100L, tol = 1e-6,
+                                   engine = "torch", native = TRUE,
+                                   accelerated = FALSE, diagnostic_interval = 10L))
+  expect_true(maxent_diagnostics(fit)$converged)
+  expect_gt(maxent_diagnostics(fit)$profile$host_synchronizations, 0L)
+  expect_lt(max(abs(fit$beta)), 10)
+})

@@ -118,6 +118,44 @@ torch_objective_factory <- function(presence_phi, background_phi, w, q, lambda1,
   }
 }
 
+torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
+                               device, dtype, max_iter, step, tol, diagnostic_interval) {
+  torch_dtype <- if (identical(dtype, "float32")) torch::torch_float32() else torch::torch_float64()
+  presence_t <- torch::torch_tensor(presence_phi, dtype = torch_dtype, device = device)
+  background_t <- torch::torch_tensor(background_phi, dtype = torch_dtype, device = device)
+  w_t <- torch::torch_tensor(w, dtype = torch_dtype, device = device)
+  q_t <- torch::torch_tensor(q, dtype = torch_dtype, device = device)
+  r2_t <- torch::torch_tensor(r2, dtype = torch_dtype, device = device)
+  beta <- torch::torch_tensor(rep(0, ncol(presence_phi)), dtype = torch_dtype, device = device)
+  values <- rep(NA_real_, max_iter)
+  previous <- beta
+  converged <- FALSE
+  parameter_change <- Inf
+  for (iteration in seq_len(max_iter)) {
+    beta <- beta$detach()$requires_grad_(TRUE)
+    z_presence <- presence_t$matmul(beta)
+    z_background <- background_t$matmul(beta)
+    logz <- torch::torch_logsumexp(torch::torch_log(q_t) + z_background, dim = 1)
+    value <- logz - (w_t * z_presence)$sum() + 0.5 * lambda2 * (r2_t * beta^2)$sum()
+    value$backward()
+    candidate <- torch::with_no_grad({ beta - step * beta$grad })
+    if (iteration %% diagnostic_interval == 0L || iteration == max_iter) {
+      values[[iteration]] <- as.numeric(value$item())
+      parameter_change <- max(abs(as.numeric((candidate - beta)$to(device = "cpu"))))
+      if (parameter_change <= tol) {
+        beta <- candidate
+        converged <- TRUE
+        break
+      }
+    }
+    previous <- beta
+    beta <- candidate
+  }
+  list(beta = as.numeric(beta$to(device = "cpu")), values = values[seq_len(iteration)],
+       iterations = iteration, converged = converged,
+       parameter_change = parameter_change)
+}
+
 #' Fit a scalar CPU maximum-entropy model
 #'
 #' @param x Numeric presence predictors when `background` is supplied, or a
@@ -136,6 +174,9 @@ torch_objective_factory <- function(presence_phi, background_phi, w, q, lambda1,
 #' @param control A list with `max_iter`, `tol`, `step`, optional `device`,
 #'   `dtype`, `engine` (`"analytic"` or `"torch"`), `accelerated`, and
 #'   `profile` (to collect objective timing and host-synchronization counts).
+#'   Set `native = TRUE` for the experimental fixed-step Torch-native mode;
+#'   it currently requires `engine = "torch"`, `lambda1 = 0`, and
+#'   `accelerated = FALSE`.
 #' @return An object of class `maxent_fit`.
 #' @export
 maxent_fit <- function(x, presence, background = NULL,
@@ -220,7 +261,19 @@ maxent_fit <- function(x, presence, background = NULL,
     result
   }
   if (max_iter < 1L || !is.finite(tol) || tol <= 0 || !is.finite(step) || step <= 0) stop("invalid solver control values.", call. = FALSE)
-  beta <- numeric(ncol(presence_phi))
+  native <- isTRUE(control$native %||% FALSE)
+  if (native && execution$engine != "torch") stop("control native requires engine = 'torch'.", call. = FALSE)
+  if (native && lambda1 != 0) stop("control native currently requires lambda1 = 0.", call. = FALSE)
+  if (native && accelerated) stop("control native currently requires accelerated = FALSE.", call. = FALSE)
+  diagnostic_interval <- as.integer(control$diagnostic_interval %||% 25L)
+  if (native && (length(diagnostic_interval) != 1L || is.na(diagnostic_interval) || diagnostic_interval < 1L)) {
+    stop("diagnostic_interval must be a positive integer.", call. = FALSE)
+  }
+  native_result <- if (native) torch_native_solve(
+    presence_phi, background_phi, w, q, lambda2, spec$penalty_l2,
+    execution$device, execution$dtype, max_iter, step, tol, diagnostic_interval
+  ) else NULL
+  beta <- if (is.null(native_result)) numeric(ncol(presence_phi)) else native_result$beta
   y <- beta
   momentum <- 1
   values <- numeric(max_iter)
@@ -228,7 +281,7 @@ maxent_fit <- function(x, presence, background = NULL,
   stop_reason <- "max_iter"
   parameter_change <- Inf
   smooth_gradient_norm <- Inf
-  for (iteration in seq_len(max_iter)) {
+  if (is.null(native_result)) for (iteration in seq_len(max_iter)) {
     baseline <- objective_eval(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     values[iteration] <- baseline$value
     current <- objective_eval(y, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
@@ -269,8 +322,16 @@ maxent_fit <- function(x, presence, background = NULL,
       y <- beta
     }
   }
+  if (!is.null(native_result)) {
+    iteration <- native_result$iterations
+    values <- native_result$values
+    converged <- native_result$converged
+    stop_reason <- if (converged) "parameter_change" else "max_iter"
+    parameter_change <- native_result$parameter_change
+    objective_evaluations <- ceiling(iteration / diagnostic_interval)
+  }
   final <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
-  if (!converged) {
+  if (!converged || !is.null(native_result)) {
     parameter_change <- if (is.finite(parameter_change)) parameter_change else NA_real_
     smooth_gradient_norm <- max(abs(final$gradient - lambda2 * spec$penalty_l2 * beta))
   }
@@ -287,7 +348,7 @@ maxent_fit <- function(x, presence, background = NULL,
                                     stop_reason = stop_reason,
                                     device = execution$device, dtype = execution$dtype,
                                     engine = execution$engine,
-                                    profile = list(enabled = profile,
+                                    profile = list(enabled = profile || native,
                                                    objective_evaluations = objective_evaluations,
                                                    objective_seconds = objective_seconds,
                                                    host_synchronizations = if (execution$engine == "torch") objective_evaluations else 0L))),
