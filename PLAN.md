@@ -581,6 +581,15 @@ MPS checkpoint on the development device and a green, archived CUDA checkpoint o
 DGX Spark; if either device is temporarily unavailable, record the gate as pending
 rather than treating a skipped backend as passing.
 
+#### CUDA checkpoint record
+
+The CUDA half of the portability checkpoint is archived in
+`benchmarks/manifests/accelerator-checkpoint-cuda-a100.md`. It passed on a JUWELS
+Booster NVIDIA A100 using Torch 0.17.0 with the CUDA 12.8 runtime: 94 tests passed,
+none failed, and the two skips were MPS-unavailable checks. Gate 3 remains pending
+until the Apple Silicon/MPS checkpoint is archived; this CUDA result does not stand in
+for MPS validation.
+
 ### Phase 4 — GPU-batched independent-species fitting and prediction
 
 **Goal:** make species count a tensor batch dimension while preserving independent
