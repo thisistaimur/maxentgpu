@@ -81,6 +81,7 @@ cat("commit:", system("git rev-parse HEAD", intern = TRUE), "\n")
 cat("species:", species_n, "background:", background_n,
     "presence/species:", presence_n, "repeats:", repeats,
     "chunk:", chunk_size, "\n")
+cat("converged_species:", sum(batch$diagnostics$converged), "/", species_n, "\n")
 cat("max_abs_difference:", max(abs(dense - scalar)), "\n")
 cat("dense_cuda_median_seconds:", dense_time[["median"]], "\n")
 cat("dense_cuda_min_seconds:", dense_time[["min"]], "\n")

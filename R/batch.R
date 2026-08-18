@@ -96,7 +96,7 @@ predict.maxent_batch_model <- function(object, newdata, type = c("raw", "link"),
     stop("batch_size must be a positive integer.", call. = FALSE)
   }
   specs <- lapply(object$models[selected], `[[`, "feature_spec")
-  shared_design <- length(specs) == 1L || vapply(specs[-1L], identical, logical(1), specs[[1L]])
+  shared_design <- length(specs) == 1L || all(vapply(specs[-1L], identical, logical(1), specs[[1L]]))
   if (!shared_design || device == "cpu" && !requireNamespace("torch", quietly = TRUE)) {
     out <- vapply(selected, function(id) predict(object$models[[id]], newdata, type = type, ...),
                   numeric(nrow(newdata)))
