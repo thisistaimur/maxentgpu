@@ -50,7 +50,11 @@ run_cuda <- function() {
   model <- maxentgpu::maxent_fit_batch(
     presence, background = background, features = "linear",
     regularization = regularization, control = control_cuda)
-  if (!all(model$diagnostics$converged)) stop("CUDA fit did not converge for every species.", call. = FALSE)
+  if (!all(model$diagnostics$converged)) {
+    failed <- model$diagnostics[!model$diagnostics$converged, , drop = FALSE]
+    print(failed[, c("species", "iterations", "stop_reason", "parameter_change", "gradient_norm")], row.names = FALSE)
+    stop("CUDA fit did not converge for every species.", call. = FALSE)
+  }
   predict(model, background, type = "link", device = "cuda", dtype = "float64", batch_size = 32L)
 }
 

@@ -55,6 +55,8 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
     d <- maxent_diagnostics(fits[[index]])
     data.frame(species = ids[[index]], iterations = d$iterations,
                converged = d$converged, stop_reason = d$stop_reason,
+               parameter_change = d$parameter_change,
+               gradient_norm = d$smooth_gradient_norm,
                device = d$device, dtype = d$dtype, engine = d$engine,
                stringsAsFactors = FALSE)
   }))
