@@ -10,10 +10,20 @@ test_that("batch fitting validates species and preserves stable extraction order
   expect_s3_class(batch, "maxent_batch_model")
   expect_identical(batch$species, c("sparrow", "finch"))
   expect_identical(batch$execution, "independent_scalar")
+  extracted <- maxent_batch_extract(batch, "finch")
+  expect_s3_class(extracted, "maxent_fit")
+  expect_identical(extracted$beta, batch$models$finch$beta)
   expect_identical(colnames(predict(batch, background, type = "link")), batch$species)
   expect_equal(unname(predict(batch, background, species = "finch", type = "raw")),
                unname(matrix(predict(batch$models$finch, background, type = "raw"), ncol = 1L)),
                tolerance = 1e-12)
+})
+
+test_that("batch extraction validates species IDs", {
+  batch <- structure(list(species = "a", models = list(a = structure(list(), class = "maxent_fit"))),
+                     class = "maxent_batch_model")
+  expect_error(maxent_batch_extract(batch, "missing"), "existing species")
+  expect_error(maxent_batch_extract(batch, c("a", "a")), "single")
 })
 
 test_that("batch records can carry species-specific backgrounds and weights", {

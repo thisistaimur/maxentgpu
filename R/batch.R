@@ -182,6 +182,26 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
             class = "maxent_batch_model")
 }
 
+#' Extract one fitted species model from a batch
+#'
+#' Extraction returns the original `maxent_fit` object for the requested species;
+#' it does not refit or copy training data beyond the model object itself.
+#'
+#' @param object A fitted `maxent_batch_model` object.
+#' @param species A single species ID in `object$species`.
+#' @return A fitted `maxent_fit` object.
+#' @export
+maxent_batch_extract <- function(object, species) {
+  if (!inherits(object, "maxent_batch_model")) {
+    stop("object is not a maxent_batch_model.", call. = FALSE)
+  }
+  if (length(species) != 1L || is.na(species) || !nzchar(as.character(species)) ||
+      !as.character(species) %in% object$species) {
+    stop("species must be one existing species ID in the batch model.", call. = FALSE)
+  }
+  object$models[[as.character(species)]]
+}
+
 #' Predict from an independent-species batch model
 #'
 #' @param object A fitted `maxent_batch_model` object.
