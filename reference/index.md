@@ -37,5 +37,7 @@
 
 - [`maxent_fit_batch()`](https://thisistaimur.github.io/maxentgpu/reference/maxent_fit_batch.md)
   : Fit independent species models from a validated batch specification
+- [`maxent_batch_extract()`](https://thisistaimur.github.io/maxentgpu/reference/maxent_batch_extract.md)
+  : Extract one fitted species model from a batch
 - [`predict(`*`<maxent_batch_model>`*`)`](https://thisistaimur.github.io/maxentgpu/reference/predict.maxent_batch_model.md)
   : Predict from an independent-species batch model

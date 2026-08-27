@@ -13,7 +13,7 @@ requested, in which case a clear error is returned.'><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">maxentgpu</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,14 @@ requested, in which case a clear error is returned.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">maxent_fit_batch</span><span class="op">(</span><span class="va">x</span>, species <span class="op">=</span> <span class="cn">NULL</span>, background <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">maxent_fit_batch</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  species <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  background <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  presence_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,6 +71,11 @@ case each element is a presence table.</p></dd>
 
 <dt id="arg-background">background<a class="anchor" aria-label="anchor" href="#arg-background"></a></dt>
 <dd><p>Optional shared background table.</p></dd>
+
+
+<dt id="arg-presence-weights">presence_weights<a class="anchor" aria-label="anchor" href="#arg-presence-weights"></a></dt>
+<dd><p>Optional list of positive per-row weight vectors,
+one per species. Names, when supplied, must match species IDs.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -8,7 +8,14 @@ unless explicitly requested, in which case a clear error is returned.
 ## Usage
 
 ``` r
-maxent_fit_batch(x, species = NULL, background = NULL, ..., control = list())
+maxent_fit_batch(
+  x,
+  species = NULL,
+  background = NULL,
+  presence_weights = NULL,
+  ...,
+  control = list()
+)
 ```
 
 ## Arguments
@@ -26,6 +33,11 @@ maxent_fit_batch(x, species = NULL, background = NULL, ..., control = list())
 - background:
 
   Optional shared background table.
+
+- presence_weights:
+
+  Optional list of positive per-row weight vectors, one per species.
+  Names, when supplied, must match species IDs.
 
 - ...:
 
