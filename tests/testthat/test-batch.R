@@ -44,6 +44,23 @@ test_that("shared-design batch prediction uses Torch matrix multiplication", {
   expect_equal(dense, scalar, tolerance = 1e-12)
 })
 
+test_that("experimental shared-design batched solver preserves species order", {
+  skip_if_not_installed("torch")
+  background <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
+  presence <- list(a = data.frame(x1 = c(0, 1), x2 = c(1, 2)),
+                  b = data.frame(x1 = c(1, 2), x2 = c(2, 3)))
+  batch <- maxent_fit_batch(
+    presence, background = background, features = "linear",
+    regularization = list(lambda1 = 0, lambda2 = 0.4),
+    control = list(batch_solver = "torch", engine = "torch", device = "cpu",
+                   max_iter = 500L, tol = 1e-5, diagnostic_interval = 25L)
+  )
+  expect_identical(batch$execution, "shared_design_torch")
+  expect_identical(batch$species, c("a", "b"))
+  expect_true(all(batch$diagnostics$device == "cpu"))
+  expect_equal(dim(predict(batch, background, type = "link")), c(4L, 2L))
+})
+
 test_that("batch rejects unstable or mismatched species IDs", {
   expect_error(maxent_fit_batch(list(data.frame(x = 1)), background = data.frame(x = 2)), "species")
   expect_error(maxent_fit_batch(list(a = data.frame(x = 1), b = data.frame(x = 2)),

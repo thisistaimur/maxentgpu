@@ -17,13 +17,15 @@ case each element is a presence table.}
 
 \item{...}{Arguments forwarded to \code{\link[=maxent_fit]{maxent_fit()}} except \code{control}.}
 
-\item{control}{Solver controls forwarded to \code{\link[=maxent_fit]{maxent_fit()}}.}
+\item{control}{Solver controls forwarded to \code{\link[=maxent_fit]{maxent_fit()}}. Set
+\code{batch_solver = "torch"} for the experimental shared-design batched solver.}
 }
 \value{
 An object of class \code{maxent_batch_model}.
 }
 \description{
-This first batch API preserves independent-model semantics and stable species
-ordering. Each species is currently fitted through the scalar solver; the
-\code{execution} field records this explicitly until dense tensor batching is added.
+This batch API preserves independent-model semantics and stable species ordering.
+Set \code{control$batch_solver = "torch"} to use the experimental shared-design
+batched L2 solver; unsupported inputs use the scalar path unless explicitly
+requested, in which case a clear error is returned.
 }

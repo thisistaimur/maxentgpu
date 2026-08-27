@@ -652,7 +652,9 @@ Tasks:
 
 - [x] Define list batch inputs, validation, and stable species ordering.
 - [ ] Add extraction of single models from a batch object.
-- [ ] Implement shared-design batching for equal background and feature specs.
+- [x] Implement an experimental shared-design Torch batched solver for linear,
+  L2-only fits; heterogeneous features and L1/species-specific weights remain on
+  the scalar fallback path.
 - [ ] Implement species-specific presence indices/weights, penalties, convergence,
   early stopping masks, and failure reporting.
 - [ ] Implement prediction as `X_new %*% t(beta)` in memory-bounded cell/species chunks.
