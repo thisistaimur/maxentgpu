@@ -130,8 +130,12 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
       stop("batch_solver = 'torch' currently supports linear features and L2-only regularization.", call. = FALSE)
     }
     specs <- lapply(fits, `[[`, "feature_spec")
-    if (!all(vapply(specs[-1L], identical, logical(1), specs[[1L]]))) {
-      stop("batch_solver = 'torch' requires identical feature specifications.", call. = FALSE)
+    compatible <- all(vapply(specs[-1L], function(spec) {
+      identical(spec$predictors, specs[[1L]]$predictors) &&
+        identical(spec$columns, specs[[1L]]$columns)
+    }, logical(1)))
+    if (!compatible) {
+      stop("batch_solver = 'torch' requires compatible feature specifications.", call. = FALSE)
     }
     solver <- torch_batch_solve_l2(
       lapply(fits, function(fit) apply_feature_spec(specs[[1L]], fit$presence)),
