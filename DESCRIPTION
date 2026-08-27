@@ -1,6 +1,6 @@
 Package: maxentgpu
 Title: Maximum-Entropy Presence-Background Models with Torch
-Version: 0.1.2
+Version: 0.1.4
 Authors@R: c(
     person("Taimur", "Khan", role = c("aut", "cre"),
            email = "taimur.khan@ufz.de")
