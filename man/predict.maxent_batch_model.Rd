@@ -30,6 +30,8 @@ execution is used for dense shared-design prediction.}
 \item{dtype}{Torch dtype (\code{"float64"} or \code{"float32"}).}
 
 \item{batch_size}{Maximum number of species materialized per prediction chunk.}
+
+\item{...}{Additional arguments passed to \code{\link[=predict.maxent_fit]{predict.maxent_fit()}}.}
 }
 \value{
 A matrix with rows corresponding to \code{newdata} and columns keyed by species ID.

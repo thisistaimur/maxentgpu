@@ -15,3 +15,8 @@ export(maxent_fit)
 export(maxent_fit_batch)
 export(read_maxent_model)
 export(save_maxent_model)
+importFrom(stats,predict)
+importFrom(utils,
+  head,
+  tail
+)

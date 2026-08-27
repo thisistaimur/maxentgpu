@@ -13,6 +13,8 @@
 #' @param control Solver controls forwarded to [maxent_fit()].
 #' @return An object of class `maxent_batch_model`.
 #' @export
+#' @importFrom stats predict
+#' @importFrom utils head tail
 maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control = list()) {
   if (!is.list(x) || !length(x)) stop("x must be a non-empty list of species inputs.", call. = FALSE)
   ids <- names(x)
@@ -76,6 +78,7 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
 #'   execution is used for dense shared-design prediction.
 #' @param dtype Torch dtype (`"float64"` or `"float32"`).
 #' @param batch_size Maximum number of species materialized per prediction chunk.
+#' @param ... Additional arguments passed to [predict.maxent_fit()].
 #' @return A matrix with rows corresponding to `newdata` and columns keyed by species ID.
 #' @export
 predict.maxent_batch_model <- function(object, newdata, type = c("raw", "link"), species = NULL,
