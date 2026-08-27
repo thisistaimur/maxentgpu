@@ -675,6 +675,10 @@ Tasks:
 - [x] Run an end-to-end Torch CPU-versus-CUDA fit-plus-predict benchmark with matching
   controls; results and the parity/no-speedup conclusion are archived in
   `benchmarks/manifests/cuda-end-to-end-performance.md`.
+- [x] Re-run the end-to-end benchmark with the shared-design batched solver and archive
+  the A100 comparison against independent scalar CUDA and CPU fits. The checkpoint
+  records a 3.73x batching improvement and 2.89x speedup over scalar CPU for the
+  tested 64-species linear/L2 workload; this is explicitly scoped to that scenario.
 - [ ] Establish API freeze and add lifecycle/deprecation policy.
 
 Acceptance criteria:

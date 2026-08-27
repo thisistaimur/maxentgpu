@@ -34,3 +34,27 @@ The CUDA route is numerically correct but does not provide a performance advanta
 this workload size. The current implementation fits species independently and
 synchronizes through R each iteration, so this is a correctness checkpoint rather
 than evidence for GPU acceleration claims.
+
+## Shared-design batched solver checkpoint
+
+The experimental `control$batch_solver = "torch"` path solves all species sharing a
+linear feature design in one Torch optimization. The comparison below uses the same
+JUWELS A100, Torch 0.17.0, and workload on commit `1174fa03ef42fdc0620bbe230635a4fb1227baf3`:
+
+- Workload: 64 species, 10,000 background rows, 128 presences/species
+- Repeats: 3; maximum iterations: 2,000; tolerance: `1e-6`
+- Regularization: L2 only (`lambda1 = 0`, `lambda2 = 0.4`)
+- Parity tolerance: `1e-4`
+
+```text
+shared_batched_cuda_median_seconds: 3.070
+independent_scalar_cuda_median_seconds: 11.447
+scalar_cpu_median_seconds: 9.453
+max_abs_difference: 6.216432e-05
+batch_speedup_over_scalar_cuda: 3.728338
+shared_cuda_speedup_over_scalar_cpu: 2.892182
+```
+
+All species converged and the maximum prediction difference was within tolerance.
+This supports a batching-throughput claim for the shared-design linear/L2 scenario;
+it is not a claim that every scalar CUDA workload is faster than CPU.
