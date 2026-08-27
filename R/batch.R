@@ -41,7 +41,7 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
   for (iteration in seq_len(max_iter)) {
     beta <- beta$detach()$requires_grad_(TRUE)
     scores_b <- background_t$matmul(beta$t())
-    logz <- torch::torch_logsumexp(torch::torch_log(q_t) + scores_b, dim = 1)
+    logz <- torch::torch_logsumexp(torch::torch_log(q_t)$reshape(c(-1L, 1L)) + scores_b, dim = 1)
     presence_loss <- lapply(seq_len(species_n), function(index) {
       (weights_t[[index]] * presence_t[[index]]$matmul(beta[index, ]))$sum()
     })
