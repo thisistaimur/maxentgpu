@@ -195,7 +195,10 @@ maxent_batch_extract <- function(object, species) {
   if (!inherits(object, "maxent_batch_model")) {
     stop("object is not a maxent_batch_model.", call. = FALSE)
   }
-  if (length(species) != 1L || is.na(species) || !nzchar(as.character(species)) ||
+  if (length(species) != 1L) {
+    stop("species must be a single species ID.", call. = FALSE)
+  }
+  if (is.na(species) || !nzchar(as.character(species)) ||
       !as.character(species) %in% object$species) {
     stop("species must be one existing species ID in the batch model.", call. = FALSE)
   }
