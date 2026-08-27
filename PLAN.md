@@ -573,6 +573,9 @@ Tasks:
   convergence therefore follows the package-wide parameter-change criterion, while
   the gradient residual remains diagnostic. The strict parity checkpoint is still
   required before accepting native performance claims.
+- Routine CI defers the experimental native-solver tests; run them explicitly on the
+  A100 checkpoint machine while solver performance and strict parity remain under
+  investigation.
 - Preliminary A100 profile: a small Torch CUDA fit initially performed 19 objective
   evaluations and 19 counted host synchronizations, with 0.488 seconds accumulated
   in objective evaluation. After caching static Torch tensors, the same profile

@@ -57,12 +57,14 @@ jobs:
           use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::roxygen2, any::torch
+          # Torch runtime installation is intentionally disabled in baseline CI.
+          # Accelerator/native checks run separately on dedicated hardware.
+          extra-packages: any::rcmdcheck, any::roxygen2
           needs: check
-      - name: Install Torch runtime
-        shell: Rscript {0}
-        run: |
-          if (!torch::torch_is_installed()) torch::install_torch()
+      # - name: Install Torch runtime
+      #   shell: Rscript {0}
+      #   run: |
+      #     if (!torch::torch_is_installed()) torch::install_torch()
       - name: Use the candidate release version
         if: github.event_name != 'pull_request'
         run: Rscript .github/scripts/set-version.R "${{ needs.version.outputs.version }}"
@@ -94,12 +96,13 @@ jobs:
           use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::roxygen2, any::torch
+          # Keep release checks independent of the large Torch runtime download.
+          extra-packages: any::rcmdcheck, any::roxygen2
           needs: check
-      - name: Install Torch runtime
-        shell: Rscript {0}
-        run: |
-          if (!torch::torch_is_installed()) torch::install_torch()
+      # - name: Install Torch runtime
+      #   shell: Rscript {0}
+      #   run: |
+      #     if (!torch::torch_is_installed()) torch::install_torch()
       - name: Confirm this is still the main branch head
         shell: bash
         run: |

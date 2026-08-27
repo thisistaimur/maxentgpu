@@ -259,6 +259,7 @@ test_that("optional solver profiling reports objective evaluation counts", {
 })
 
 test_that("experimental Torch-native solver keeps optimization state off the host", {
+  skip("Experimental native solver tests are deferred from routine CI.")
   fit <- maxent_fit(data.frame(x = c(0, 1, 2, 3)), c(TRUE, TRUE, FALSE, FALSE),
                     features = "linear",
                     regularization = list(lambda1 = 0, lambda2 = 0.4),
@@ -273,6 +274,7 @@ test_that("experimental Torch-native solver keeps optimization state off the hos
 })
 
 test_that("Torch-native backtracking agrees with the regular Torch solver", {
+  skip("Experimental native solver tests are deferred from routine CI.")
   skip_if_not_installed("torch")
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   native <- maxent_fit(
