@@ -4,7 +4,7 @@ backend_available <- function(backend) {
 }
 
 test_that("Torch objective is numerically portable to available accelerators", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
   background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)
   beta <- c(0.15, -0.2)
@@ -27,7 +27,7 @@ test_that("Torch objective is numerically portable to available accelerators", {
 })
 
 test_that("scalar Torch fits agree across CPU and available accelerators", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   cpu <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
                     regularization = list(lambda1 = 0, lambda2 = 0.4),

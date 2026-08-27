@@ -198,7 +198,7 @@ test_that("analytic smooth gradient agrees with central differences", {
 })
 
 test_that("Torch autograd agrees with the stable analytic gradient", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
   background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)
   w <- c(0.25, 0.75)
@@ -221,7 +221,7 @@ test_that("Torch autograd agrees with the stable analytic gradient", {
 })
 
 test_that("package Torch objective oracle agrees with analytic objective", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   presence_phi <- matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE)
   background_phi <- matrix(c(2, 3, 3, 4, 4, 5), nrow = 3, byrow = TRUE)
   beta <- c(0.15, -0.2)
@@ -235,7 +235,7 @@ test_that("package Torch objective oracle agrees with analytic objective", {
 })
 
 test_that("Torch solver engine matches the analytic CPU engine", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   analytic <- maxent_fit(x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",
                           control = list(max_iter = 500L, tol = 1e-8, engine = "analytic"))
@@ -275,7 +275,7 @@ test_that("experimental Torch-native solver keeps optimization state off the hos
 
 test_that("Torch-native backtracking agrees with the regular Torch solver", {
   skip("Experimental native solver tests are deferred from routine CI.")
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   x <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   native <- maxent_fit(
     x, c(TRUE, TRUE, FALSE, FALSE), features = "linear",

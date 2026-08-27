@@ -207,7 +207,10 @@ predict.maxent_batch_model <- function(object, newdata, type = c("raw", "link"),
   }
   specs <- lapply(object$models[selected], `[[`, "feature_spec")
   shared_design <- length(specs) == 1L || all(vapply(specs[-1L], identical, logical(1), specs[[1L]]))
-  if (!shared_design || device == "cpu" && !requireNamespace("torch", quietly = TRUE)) {
+  torch_runtime_ok <- requireNamespace("torch", quietly = TRUE) &&
+    isTRUE(tryCatch({ torch::torch_tensor(0, dtype = torch::torch_float64()); TRUE },
+                    error = function(error) FALSE))
+  if (!shared_design || device == "cpu" && !torch_runtime_ok) {
     out <- vapply(selected, function(id) predict(object$models[[id]], newdata, type = type, ...),
                   numeric(nrow(newdata)))
     if (is.null(dim(out))) out <- matrix(out, ncol = 1L, dimnames = list(NULL, selected))

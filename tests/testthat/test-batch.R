@@ -31,7 +31,7 @@ test_that("batch records can carry species-specific backgrounds and weights", {
 })
 
 test_that("shared-design batch prediction uses Torch matrix multiplication", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   background <- data.frame(x1 = c(0, 1, 2), x2 = c(1, 2, 3))
   presence <- list(a = data.frame(x1 = c(0, 1), x2 = c(1, 2)),
                   b = data.frame(x1 = c(1, 2), x2 = c(2, 3)))
@@ -45,7 +45,7 @@ test_that("shared-design batch prediction uses Torch matrix multiplication", {
 })
 
 test_that("experimental shared-design batched solver preserves species order", {
-  skip_if_not_installed("torch")
+  skip_if_torch_unavailable()
   background <- data.frame(x1 = c(0, 1, 2, 3), x2 = c(1, 2, 3, 4))
   presence <- list(a = data.frame(x1 = c(0, 1), x2 = c(1, 2)),
                   b = data.frame(x1 = c(1, 2), x2 = c(2, 3)))
