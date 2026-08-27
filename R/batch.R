@@ -36,7 +36,9 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
   beta <- torch::torch_zeros(c(species_n, feature_n), dtype = torch_dtype, device = device)
   max_iter <- as.integer(control$max_iter %||% 2000L)
   tol <- as.numeric(control$tol %||% 1e-8)
-  step <- as.numeric(control$step %||% 1)
+  # A conservative default keeps weighted species stable; callers can override
+  # this with control$step after profiling a particular design.
+  step <- as.numeric(control$step %||% 0.25)
   q_t <- torch::torch_tensor(normalize_weights(background_weights, nrow(background_phi),
                                                 "background_weights"),
                              dtype = torch_dtype, device = device)
