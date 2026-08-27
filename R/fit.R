@@ -161,7 +161,7 @@ torch_native_solve <- function(presence_phi, background_phi, w, q, lambda2, r2,
       values[[iteration]] <- as.numeric(value$item())
       parameter_change <- max(abs(as.numeric((candidate - beta)$to(device = "cpu"))))
       gradient_norm <- max(abs(as.numeric(beta$grad$to(device = "cpu"))))
-      if (parameter_change <= tol && gradient_norm <= tol) {
+      if (parameter_change <= tol) {
         beta <- candidate
         converged <- TRUE
         break
@@ -352,7 +352,7 @@ maxent_fit <- function(x, presence, background = NULL,
     iteration <- native_result$iterations
     values <- native_result$values
     converged <- native_result$converged
-    stop_reason <- if (converged) "parameter_and_gradient_change" else "max_iter"
+    stop_reason <- if (converged) "parameter_change" else "max_iter"
     parameter_change <- native_result$parameter_change
     smooth_gradient_norm <- native_result$gradient_norm
     objective_evaluations <- ceiling(iteration / diagnostic_interval)

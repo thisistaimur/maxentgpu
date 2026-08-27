@@ -568,9 +568,11 @@ Tasks:
   regular Torch CPU solver, above the declared `1e-7` parity gate; that result is not
   an accepted performance checkpoint.
 - Native backtracking reduced the observed error to `2.45e-6`, but tightening the
-  iteration budget and parameter tolerance did not improve it. The next refinement
-  requires both parameter-change and gradient-norm convergence checks; until the
-  checkpoint passes, native performance remains exploratory.
+  iteration budget and parameter tolerance did not improve it; some fits stagnate
+  with zero parameter movement while retaining a small residual gradient. Native
+  convergence therefore follows the package-wide parameter-change criterion, while
+  the gradient residual remains diagnostic. The strict parity checkpoint is still
+  required before accepting native performance claims.
 - Preliminary A100 profile: a small Torch CUDA fit initially performed 19 objective
   evaluations and 19 counted host synchronizations, with 0.488 seconds accumulated
   in objective evaluation. After caching static Torch tensors, the same profile
