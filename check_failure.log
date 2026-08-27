@@ -1,0 +1,188 @@
+Publish versioned source release	Set and validate release version	﻿2026-08-27T12:21:28.8788573Z ##[group]Run set -euo pipefail
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8789018Z [36;1mset -euo pipefail[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8789347Z [36;1mVERSION="0.1.3"[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8789734Z [36;1mRscript .github/scripts/set-version.R "${VERSION}"[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8790226Z [36;1mRscript -e 'roxygen2::roxygenise()'[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8790593Z [36;1mR CMD build .[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8790925Z [36;1mTARBALL="maxentgpu_${VERSION}.tar.gz"[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8791315Z [36;1mtest -f "${TARBALL}"[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8792027Z [36;1mRscript -e 'rcmdcheck::rcmdcheck(commandArgs(TRUE)[1], args = c("--no-manual", "--as-cran"), error_on = "warning")' "${TARBALL}"[0m
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8823345Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8824038Z env:
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8824356Z   R_LIBS_USER: /home/runner/work/_temp/Library
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8824747Z   TZ: UTC
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8825028Z   _R_CHECK_SYSTEM_CLOCK_: FALSE
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8825361Z   NOT_CRAN: true
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8825852Z   RSPM: https://packagemanager.posit.co/cran/__linux__/noble/latest
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8826543Z   RENV_CONFIG_REPOS_OVERRIDE: https://packagemanager.posit.co/cran/__linux__/noble/latest
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8827168Z   R_LIB_FOR_PAK: /opt/R/4.6.1/lib/R/site-library
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:28.8827533Z ##[endgroup]
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:29.0387158Z Set DESCRIPTION to version 0.1.3
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:29.0390232Z Set ./NEWS.md heading to version 0.1.3
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:29.6042512Z ℹ Loading maxentgpu
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.0024368Z Writing 'NAMESPACE'
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.0504544Z Writing 'maxent_batch_extract.Rd'
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.2301507Z * checking for file ‘./DESCRIPTION’ ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.2415316Z * preparing ‘maxentgpu’:
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.2495151Z * checking DESCRIPTION meta-information ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.4508982Z * checking for LF line-endings in source and make files and shell scripts
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.4527848Z * checking for empty or unneeded directories
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.4574926Z * building ‘maxentgpu_0.1.3.tar.gz’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:30.5637449Z 
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:31.7836909Z ── R CMD check ─────────────────────────────────────────────────────────────────
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0215726Z * using log directory ‘/tmp/Rtmp1h6zQO/file171ea046eb6/maxentgpu.Rcheck’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0220906Z * using R version 4.6.1 (2026-06-24)
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0221663Z * using platform: x86_64-pc-linux-gnu
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0222170Z * R was compiled by
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0222653Z     gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0223230Z     GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0223959Z * running under: Ubuntu 24.04.4 LTS
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0224396Z * using session charset: UTF-8
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0224812Z * current time: 2026-08-27 12:21:32 UTC
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0951830Z * using options ‘--no-manual --as-cran’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0962179Z * checking for file ‘maxentgpu/DESCRIPTION’ ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0963037Z * this is package ‘maxentgpu’ version ‘0.1.3’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:32.0963737Z * package encoding: UTF-8
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2205119Z * checking CRAN incoming feasibility ... [3s/10s] NOTE
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2215352Z Maintainer: ‘Taimur Khan <taimur.khan@ufz.de>’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2216092Z New submission
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2216619Z Found the following (possibly) invalid URLs:
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2217234Z   URL: https://github.com/thisistaimur/maxentgpu
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2217748Z     From: DESCRIPTION
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2218230Z           man/maxentgpu-package.Rd
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2218722Z     Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2219117Z     Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2219778Z   URL: https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2220427Z     From: README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2220837Z     Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2221276Z     Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2221912Z   URL: https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2222886Z     From: README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2223286Z     Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2223683Z     Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2224429Z   URL: https://github.com/thisistaimur/maxentgpu/issues
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2224971Z     From: DESCRIPTION
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2225416Z           man/maxentgpu-package.Rd
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2225856Z     Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2226260Z     Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2226788Z   URL: https://github.com/thisistaimur/maxentgpu/releases
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2227325Z     From: README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2227715Z     Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2228112Z     Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2228854Z   URL: https://thisistaimur.github.io/maxentgpu/ (moved to https://thisistaimur.me/maxentgpu/)
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2229572Z     From: DESCRIPTION
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2230053Z           man/maxentgpu-package.Rd
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2230521Z           README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2230922Z     Status: 301
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2231359Z     Message: Moved Permanently
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2232012Z For content that is 'Moved Permanently', please change http to https,
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2232759Z add trailing slashes, or replace the old by the new URL.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:42.2238899Z * checking package namespace information ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.1926399Z * checking package dependencies ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.1941257Z * checking if this is a source package ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.1944169Z * checking if there is a namespace ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.8587550Z * checking for executable files ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.8604791Z * checking for hidden files and directories ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.8614869Z * checking for portable file names ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:44.8624078Z * checking for sufficient/correct file permissions ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.2093153Z * checking whether package ‘maxentgpu’ can be installed ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.2122819Z * checking installed package size ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.2274810Z * checking package directory ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.2279375Z * checking for future file timestamps ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.3766806Z * checking DESCRIPTION meta-information ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.6505366Z * checking top-level files ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.6505992Z * checking for left-over files ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.6506556Z * checking index information ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.7680152Z * checking package subdirectories ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.8137291Z * checking code files for non-ASCII characters ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:46.8617187Z * checking R files for syntax errors ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:47.0098227Z * checking whether the package can be loaded ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:47.0906436Z * checking whether the package can be loaded with stated dependencies ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:47.1756696Z * checking whether the package can be unloaded cleanly ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:47.2619170Z * checking whether the namespace can be loaded with stated dependencies ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:47.4125753Z * checking whether the namespace can be unloaded cleanly ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:47.5715930Z * checking loading without being on the library search path ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:48.6606104Z * checking use of S3 registration ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:49.4146371Z * checking dependencies in R code ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:49.6062683Z * checking S3 generic/method consistency ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:49.7034503Z * checking replacement functions ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:49.8707624Z * checking foreign function calls ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:52.7680056Z * checking R code for possible problems ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.1328272Z * checking Rd files ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.1778898Z * checking Rd metadata ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.2480359Z * checking Rd line widths ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.3684955Z * checking Rd cross-references ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.4806901Z * checking for missing documentation entries ... WARNING
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.4828999Z ##[warning]Undocumented code objects:
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.4838449Z   ‘torch_batch_solve_l2’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.4839397Z All user-level objects in a package should have documentation entries.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.4840209Z See chapter ‘Writing R documentation files’ in the ‘Writing R
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.4840778Z Extensions’ manual.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:53.8361452Z * checking for code/documentation mismatches ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:54.1739576Z * checking Rd \usage sections ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:54.2678961Z * checking Rd contents ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:54.3229892Z * checking for unstated dependencies in examples ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:54.7512091Z * checking examples ... NONE
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:54.8485549Z * checking for unstated dependencies in ‘tests’ ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:55.0000822Z * checking tests ...
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6115119Z   Running ‘testthat.R’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6164654Z  OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6182120Z * checking for non-standard things in the check directory ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6190488Z * checking for detritus in the temp directory ... OK
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6192694Z * DONE
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6193029Z 
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6193331Z Status: 1 WARNING, 1 NOTE
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6193743Z See
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6194723Z   ‘/tmp/Rtmp1h6zQO/file171ea046eb6/maxentgpu.Rcheck/00check.log’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6195406Z for details.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6778233Z ── R CMD check results ──────────────────────────────────── maxentgpu 0.1.3 ────
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6795444Z Duration: 25s
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6795914Z 
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6815065Z ❯ checking for missing documentation entries ... WARNING
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6816881Z ##[warning]  Undocumented code objects:
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6847547Z ##[error]Error: R CMD check found WARNINGs
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6848834Z Execution halted
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6849379Z     ‘torch_batch_solve_l2’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6849992Z   All user-level objects in a package should have documentation entries.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6851085Z   See chapter ‘Writing R documentation files’ in the ‘Writing R
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6851668Z   Extensions’ manual.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6851898Z 
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6852257Z ❯ checking CRAN incoming feasibility ... [3s/10s] NOTE
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6852898Z   Maintainer: ‘Taimur Khan <taimur.khan@ufz.de>’
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6853310Z   
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6853611Z   New submission
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6854043Z   
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6854380Z   Found the following (possibly) invalid URLs:
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6854899Z     URL: https://github.com/thisistaimur/maxentgpu
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6855383Z       From: DESCRIPTION
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6855784Z             man/maxentgpu-package.Rd
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6856255Z       Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6856612Z       Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6857268Z     URL: https://github.com/thisistaimur/maxentgpu/actions/workflows/ci-release.yaml
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6857888Z       From: README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6858202Z       Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6858536Z       Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6859120Z     URL: https://github.com/thisistaimur/maxentgpu/actions/workflows/pkgdown.yaml
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6859706Z       From: README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6860014Z       Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6860329Z       Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6860812Z     URL: https://github.com/thisistaimur/maxentgpu/issues
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6861309Z       From: DESCRIPTION
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6861708Z             man/maxentgpu-package.Rd
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6862116Z       Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6862446Z       Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6862935Z     URL: https://github.com/thisistaimur/maxentgpu/releases
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6863426Z       From: README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6863727Z       Status: 404
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6865219Z       Message: Not Found
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6865938Z     URL: https://thisistaimur.github.io/maxentgpu/ (moved to https://thisistaimur.me/maxentgpu/)
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6866596Z       From: DESCRIPTION
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6866916Z             man/maxentgpu-package.Rd
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6867281Z             README.md
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6867799Z       Status: 301
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6868127Z       Message: Moved Permanently
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6868670Z   For content that is 'Moved Permanently', please change http to https,
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6869312Z   add trailing slashes, or replace the old by the new URL.
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6869645Z 
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6869994Z 0 errors ✔ | 1 warning ✖ | 1 note ✖
+Publish versioned source release	Set and validate release version	2026-08-27T12:21:56.6930528Z ##[error]Process completed with exit code 1.
