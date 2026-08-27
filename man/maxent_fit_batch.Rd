@@ -4,7 +4,14 @@
 \alias{maxent_fit_batch}
 \title{Fit independent species models from a validated batch specification}
 \usage{
-maxent_fit_batch(x, species = NULL, background = NULL, ..., control = list())
+maxent_fit_batch(
+  x,
+  species = NULL,
+  background = NULL,
+  presence_weights = NULL,
+  ...,
+  control = list()
+)
 }
 \arguments{
 \item{x}{A named list of species records. Each record must contain \code{presence}
@@ -14,6 +21,9 @@ case each element is a presence table.}
 \item{species}{Optional character species IDs. Required when \code{x} is unnamed.}
 
 \item{background}{Optional shared background table.}
+
+\item{presence_weights}{Optional list of positive per-row weight vectors,
+one per species. Names, when supplied, must match species IDs.}
 
 \item{...}{Arguments forwarded to \code{\link[=maxent_fit]{maxent_fit()}} except \code{control}.}
 

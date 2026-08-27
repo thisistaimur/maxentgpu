@@ -14,27 +14,32 @@
 #' @param control Solver controls forwarded to [maxent_fit()]. Set
 #'   `batch_solver = "torch"` for the experimental shared-design batched solver.
 #' @return An object of class `maxent_batch_model`.
-#' @export
 #' @importFrom stats predict
 #' @importFrom utils head tail
 #' @noRd
 
 torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
-                                 device = "cpu", dtype = "float64") {
+                                 device = "cpu", dtype = "float64",
+                                 presence_weights = NULL, background_weights = NULL) {
   if (!requireNamespace("torch", quietly = TRUE)) stop("torch is required for batched fitting.", call. = FALSE)
   torch_dtype <- if (identical(dtype, "float32")) torch::torch_float32() else torch::torch_float64()
   species_n <- length(presence_phi)
   feature_n <- ncol(background_phi)
   background_t <- torch::torch_tensor(background_phi, dtype = torch_dtype, device = device)
   presence_t <- lapply(presence_phi, torch::torch_tensor, dtype = torch_dtype, device = device)
-  weights_t <- lapply(presence_phi, function(phi) {
-    torch::torch_tensor(rep(1 / nrow(phi), nrow(phi)), dtype = torch_dtype, device = device)
+  weights_t <- lapply(seq_along(presence_phi), function(index) {
+    weights <- if (is.null(presence_weights)) NULL else presence_weights[[index]]
+    torch::torch_tensor(normalize_weights(weights, nrow(presence_phi[[index]]),
+                                          "presence_weights"),
+                        dtype = torch_dtype, device = device)
   })
   beta <- torch::torch_zeros(c(species_n, feature_n), dtype = torch_dtype, device = device)
   max_iter <- as.integer(control$max_iter %||% 2000L)
   tol <- as.numeric(control$tol %||% 1e-8)
   step <- as.numeric(control$step %||% 1)
-  q_t <- torch::torch_tensor(rep(1 / nrow(background_phi), nrow(background_phi)), dtype = torch_dtype, device = device)
+  q_t <- torch::torch_tensor(normalize_weights(background_weights, nrow(background_phi),
+                                                "background_weights"),
+                             dtype = torch_dtype, device = device)
   converged <- rep(FALSE, species_n)
   parameter_change <- rep(Inf, species_n)
   gradient_norm <- rep(Inf, species_n)
@@ -76,12 +81,15 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
 #'   case each element is a presence table.
 #' @param species Optional character species IDs. Required when `x` is unnamed.
 #' @param background Optional shared background table.
+#' @param presence_weights Optional list of positive per-row weight vectors,
+#'   one per species. Names, when supplied, must match species IDs.
 #' @param ... Arguments forwarded to [maxent_fit()] except `control`.
 #' @param control Solver controls forwarded to [maxent_fit()]. Set
 #'   `batch_solver = "torch"` for the experimental shared-design batched solver.
 #' @return An object of class `maxent_batch_model`.
 #' @export
-maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control = list()) {
+maxent_fit_batch <- function(x, species = NULL, background = NULL,
+                             presence_weights = NULL, ..., control = list()) {
   if (!is.list(x) || !length(x)) stop("x must be a non-empty list of species inputs.", call. = FALSE)
   ids <- names(x)
   if (is.null(ids) || any(!nzchar(ids))) {
@@ -111,6 +119,17 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
   # design; this would defeat the purpose of batching for large species sets.
   fit_control <- control
   if (use_batched_solver) fit_control$max_iter <- 1L
+  if (use_batched_solver && !is.null(background)) {
+    if (!is.null(presence_weights) && length(presence_weights) != length(x)) {
+      stop("presence_weights must contain one vector per species.", call. = FALSE)
+    }
+    if (!is.null(presence_weights) && !is.null(names(presence_weights))) {
+      if (!setequal(names(presence_weights), ids)) {
+        stop("presence_weights names must match species IDs.", call. = FALSE)
+      }
+      presence_weights <- presence_weights[ids]
+    }
+  }
   fits <- lapply(seq_along(x), function(index) {
     record <- x[[index]]
     if (is.null(background)) {
@@ -125,6 +144,7 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
       if (!is.data.frame(record) || !nrow(record)) stop("each species presence input must be a non-empty data frame.", call. = FALSE)
       args <- c(list(presence = record, background = background), dots,
                 list(control = fit_control))
+      if (!is.null(presence_weights)) args$presence_weights <- presence_weights[[index]]
     }
     do.call(maxent_fit, args)
   })
@@ -147,7 +167,9 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
       apply_feature_spec(specs[[1L]], background),
       control = control, lambda2 = as.numeric((dots$regularization %||% list(lambda2 = 1))$lambda2 %||% 1),
       device = maxent_diagnostics(fits[[1L]])$device,
-      dtype = maxent_diagnostics(fits[[1L]])$dtype
+      dtype = maxent_diagnostics(fits[[1L]])$dtype,
+      presence_weights = lapply(fits, `[[`, "presence_weights"),
+      background_weights = fits[[1L]]$background_weights
     )
     fits <- lapply(seq_along(fits), function(index) {
       fit <- fits[[index]]
