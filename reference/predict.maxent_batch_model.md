@@ -50,6 +50,11 @@ predict(
 
   Maximum number of species materialized per prediction chunk.
 
+- ...:
+
+  Additional arguments passed to
+  [`predict.maxent_fit()`](https://thisistaimur.github.io/maxentgpu/reference/predict.maxent_fit.md).
+
 ## Value
 
 A matrix with rows corresponding to `newdata` and columns keyed by
