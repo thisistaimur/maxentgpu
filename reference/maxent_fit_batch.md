@@ -1,9 +1,9 @@
 # Fit independent species models from a validated batch specification
 
-This first batch API preserves independent-model semantics and stable
-species ordering. Each species is currently fitted through the scalar
-solver; the `execution` field records this explicitly until dense tensor
-batching is added.
+This batch API preserves independent-model semantics and stable species
+ordering. Set `control$batch_solver = "torch"` to use the experimental
+shared-design batched L2 solver; unsupported inputs use the scalar path
+unless explicitly requested, in which case a clear error is returned.
 
 ## Usage
 
@@ -37,6 +37,8 @@ maxent_fit_batch(x, species = NULL, background = NULL, ..., control = list())
 
   Solver controls forwarded to
   [`maxent_fit()`](https://thisistaimur.github.io/maxentgpu/reference/maxent_fit.md).
+  Set `batch_solver = "torch"` for the experimental shared-design
+  batched solver.
 
 ## Value
 
