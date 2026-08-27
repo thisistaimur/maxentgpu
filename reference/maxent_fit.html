@@ -96,7 +96,13 @@ optional feature-specific non-negative <code>penalty_l1</code> and <code>penalty
 
 <dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
 <dd><p>A list with <code>max_iter</code>, <code>tol</code>, <code>step</code>, optional <code>device</code>,
-<code>dtype</code>, <code>engine</code> (<code>"analytic"</code> or <code>"torch"</code>), and <code>accelerated</code>.</p></dd>
+<code>dtype</code>, <code>engine</code> (<code>"analytic"</code> or <code>"torch"</code>), <code>accelerated</code>, and
+<code>profile</code> (to collect objective timing and host-synchronization counts).
+Set <code>native = TRUE</code> for the experimental Torch-native mode. By default it
+uses objective backtracking for improved numerical agreement; set
+<code>native_method = "fixed"</code> to use the earlier fixed-step method.
+it currently requires <code>engine = "torch"</code>, <code>lambda1 = 0</code>, and
+<code>accelerated = FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

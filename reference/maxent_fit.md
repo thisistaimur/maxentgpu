@@ -64,7 +64,13 @@ maxent_fit(
 - control:
 
   A list with `max_iter`, `tol`, `step`, optional `device`, `dtype`,
-  `engine` (`"analytic"` or `"torch"`), and `accelerated`.
+  `engine` (`"analytic"` or `"torch"`), `accelerated`, and `profile` (to
+  collect objective timing and host-synchronization counts). Set
+  `native = TRUE` for the experimental Torch-native mode. By default it
+  uses objective backtracking for improved numerical agreement; set
+  `native_method = "fixed"` to use the earlier fixed-step method. it
+  currently requires `engine = "torch"`, `lambda1 = 0`, and
+  `accelerated = FALSE`.
 
 ## Value
 
