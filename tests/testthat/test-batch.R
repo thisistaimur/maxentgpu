@@ -85,7 +85,7 @@ test_that("weighted shared-design solver matches scalar weighted fits", {
                    max_iter = 500L, tol = 1e-5, diagnostic_interval = 25L)
   )
   scalar <- lapply(seq_along(presence), function(index) maxent_fit(
-    presence[[index]], background = background,
+    x = presence[[index]], presence = presence[[index]], background = background,
     presence_weights = weights[[index]], features = "linear",
     regularization = regularization,
     control = list(engine = "torch", device = "cpu", max_iter = 500L, tol = 1e-5)
