@@ -53,4 +53,5 @@ reference:
   - title: Independent-species batches
     contents:
       - maxent_fit_batch
+      - maxent_batch_extract
       - predict.maxent_batch_model
