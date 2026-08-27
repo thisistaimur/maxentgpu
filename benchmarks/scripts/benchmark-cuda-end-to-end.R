@@ -14,6 +14,7 @@ presence_n <- as.integer(Sys.getenv("MAXENTGPU_E2E_PRESENCE", "64"))
 repeats <- as.integer(Sys.getenv("MAXENTGPU_E2E_REPEATS", "3"))
 max_iter <- as.integer(Sys.getenv("MAXENTGPU_E2E_MAX_ITER", "1000"))
 native <- identical(toupper(Sys.getenv("MAXENTGPU_E2E_NATIVE", "FALSE")), "TRUE")
+batch_solver <- identical(toupper(Sys.getenv("MAXENTGPU_E2E_BATCH_SOLVER", "FALSE")), "TRUE")
 fit_tol <- as.numeric(Sys.getenv("MAXENTGPU_E2E_TOL", "1e-8"))
 parity_tol <- as.numeric(Sys.getenv("MAXENTGPU_E2E_PARITY_TOL", "1e-7"))
 diagnostic_interval <- as.integer(Sys.getenv("MAXENTGPU_E2E_DIAGNOSTIC_INTERVAL", "5"))
@@ -37,7 +38,8 @@ control_cpu <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                     engine = "torch", device = "cpu", dtype = "float64")
 control_cuda <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                      engine = "torch", device = "cuda", dtype = "float64",
-                     native = native, diagnostic_interval = diagnostic_interval)
+                     native = native, diagnostic_interval = diagnostic_interval,
+                     batch_solver = if (batch_solver) "torch" else NULL)
 
 sync <- function() torch::cuda_synchronize()
 run_cpu <- function() {
@@ -77,7 +79,8 @@ cat("CUDA end-to-end fit-plus-predict benchmark\n")
 cat("commit:", system("git rev-parse HEAD", intern = TRUE), "\n")
 cat("species:", species_n, "background:", background_n, "presence/species:", presence_n,
     "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
-    "diagnostic_interval:", diagnostic_interval, "native:", native, "\n")
+    "diagnostic_interval:", diagnostic_interval, "native:", native,
+    "batch_solver:", batch_solver, "\n")
 max_difference <- max(abs(cuda$result - cpu$result))
 cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n")
 if (max_difference > parity_tol) {

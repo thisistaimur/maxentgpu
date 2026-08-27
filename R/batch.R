@@ -106,6 +106,11 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
   if (use_batched_solver && is.null(background)) {
     stop("control batch_solver = 'torch' requires a shared background.", call. = FALSE)
   }
+  # The batched solver only needs model shells to obtain feature metadata. Do
+  # not spend a full scalar optimization pass before solving the shared
+  # design; this would defeat the purpose of batching for large species sets.
+  fit_control <- control
+  if (use_batched_solver) fit_control$max_iter <- 1L
   fits <- lapply(seq_along(x), function(index) {
     record <- x[[index]]
     if (is.null(background)) {
@@ -113,13 +118,13 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL, ..., control 
         stop("each x element must contain presence and background when no shared background is supplied.", call. = FALSE)
       }
       args <- c(list(presence = record$presence, background = record$background), dots,
-                list(control = control))
+                list(control = fit_control))
       if (!is.null(record$presence_weights)) args$presence_weights <- record$presence_weights
       if (!is.null(record$background_weights)) args$background_weights <- record$background_weights
     } else {
       if (!is.data.frame(record) || !nrow(record)) stop("each species presence input must be a non-empty data frame.", call. = FALSE)
       args <- c(list(presence = record, background = background), dots,
-                list(control = control))
+                list(control = fit_control))
     }
     do.call(maxent_fit, args)
   })
