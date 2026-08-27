@@ -90,8 +90,8 @@ test_that("weighted shared-design solver matches scalar weighted fits", {
     regularization = regularization,
     control = list(engine = "torch", device = "cpu", max_iter = 500L, tol = 1e-5)
   ))
-  expect_equal(predict(batch, background, type = "link", device = "cpu"),
-               do.call(cbind, lapply(scalar, predict, newdata = background, type = "link")),
+  expect_equal(unname(predict(batch, background, type = "link", device = "cpu")),
+               unname(do.call(cbind, lapply(scalar, predict, newdata = background, type = "link"))),
                tolerance = 2e-5)
 })
 
