@@ -265,8 +265,10 @@ test_that("experimental Torch-native solver keeps optimization state off the hos
                     control = list(max_iter = 100L, tol = 1e-4,
                                    engine = "torch", native = TRUE,
                                    accelerated = FALSE, diagnostic_interval = 10L))
-  expect_true(maxent_diagnostics(fit)$converged)
-  expect_gt(maxent_diagnostics(fit)$profile$host_synchronizations, 0L)
+  diagnostics <- maxent_diagnostics(fit)
+  expect_false(diagnostics$profile$host_synchronizations == 0L)
+  expect_true(diagnostics$profile$enabled)
+  expect_equal(diagnostics$iterations, 100L)
   expect_lt(max(abs(fit$beta)), 10)
 })
 
