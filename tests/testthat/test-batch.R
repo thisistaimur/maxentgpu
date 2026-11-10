@@ -111,13 +111,13 @@ test_that("shared-design solver accepts species-specific L2 strengths", {
     presence, background = background, features = "linear",
     regularization = list(lambda1 = 0, lambda2 = lambda2),
     control = list(batch_solver = "torch", engine = "torch", device = "cpu",
-                   max_iter = 1000L, tol = 1e-5, diagnostic_interval = 25L)
+                   max_iter = 5000L, tol = 1e-7, diagnostic_interval = 25L)
   )
   scalar <- lapply(seq_along(presence), function(index) maxent_fit(
     x = presence[[index]], presence = presence[[index]], background = background,
     features = "linear",
     regularization = list(lambda1 = 0, lambda2 = unname(lambda2[[index]])),
-    control = list(engine = "torch", device = "cpu", max_iter = 1000L, tol = 1e-5)
+    control = list(engine = "torch", device = "cpu", max_iter = 5000L, tol = 1e-7)
   ))
   expect_true(all(batch$diagnostics$converged))
   expect_equal(unname(predict(batch, background, type = "link", device = "cpu")),
