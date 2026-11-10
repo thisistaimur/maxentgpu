@@ -651,12 +651,15 @@ to be beneficial.
 Tasks:
 
 - [x] Define list batch inputs, validation, and stable species ordering.
-- [ ] Add extraction of single models from a batch object.
+- [x] Add extraction of a single fitted model by species ID from a batch object.
 - [x] Implement an experimental shared-design Torch batched solver for linear,
   L2-only fits; heterogeneous features and L1/species-specific weights remain on
   the scalar fallback path.
-- [ ] Implement species-specific presence indices/weights, penalties, convergence,
-  early stopping masks, and failure reporting.
+- [x] Implement species-specific presence weights and shared-background weights in the
+  shared-design solver; weighted parity is covered against scalar Torch fits.
+- [x] Freeze each species' coefficients after it reaches the convergence tolerance and
+  report its own convergence iteration.
+- [ ] Implement species-specific penalties and per-species failure reporting.
 - [ ] Implement prediction as `X_new %*% t(beta)` in memory-bounded cell/species chunks.
 - [x] Implement shared-design Torch prediction as `X_new %*% t(beta)` with explicit
   species chunking and CUDA device selection.
@@ -665,8 +668,8 @@ Tasks:
 - [ ] Group heterogeneous species by feature spec and regularization shape; fall back to
   scalar execution for incompatible cases with a visible diagnostic.
 - [ ] Ensure one failed/non-convergent species does not corrupt successful species.
-- [ ] Add scalar-vs-batch metamorphic tests on CPU/CUDA/MPS, including reordered species,
-  unequal presence counts, weights, missing species, and partial extraction.
+- [ ] Expand scalar-vs-batch metamorphic tests on CPU/CUDA/MPS, including reordered
+  species, unequal presence counts, weights, missing species, and partial extraction.
 - [x] Verify shared-design CUDA batch predictions against independent scalar predictions
   for a two-species A100 smoke fixture; the archived maximum absolute difference is 0.
 - [x] Run larger CUDA batch prediction measurements with fully converged fixtures;

@@ -68,6 +68,9 @@ test_that("experimental shared-design batched solver preserves species order", {
   expect_identical(batch$execution, "shared_design_torch")
   expect_identical(batch$species, c("a", "b"))
   expect_true(all(batch$diagnostics$device == "cpu"))
+  expect_true(all(batch$diagnostics$converged))
+  expect_true(all(batch$diagnostics$iterations >= 1L &
+                    batch$diagnostics$iterations <= 500L))
   expect_equal(dim(predict(batch, background, type = "link")), c(4L, 2L))
 })
 

@@ -34,8 +34,9 @@ one per species. Names, when supplied, must match species IDs.}
 An object of class \code{maxent_batch_model}.
 }
 \description{
-This batch API preserves independent-model semantics and stable species ordering.
+This batch API preserves independent-model semantics, stable species ordering,
+and per-species convergence diagnostics.
 Set \code{control$batch_solver = "torch"} to use the experimental shared-design
-batched L2 solver; unsupported inputs use the scalar path unless explicitly
-requested, in which case a clear error is returned.
+batched L2 solver. Presence weights can vary by species. Converged species
+stop updating independently; unsupported inputs return a clear error.
 }

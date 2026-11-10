@@ -2,8 +2,8 @@
 #'
 #' This batch API preserves independent-model semantics and stable species ordering.
 #' Set `control$batch_solver = "torch"` to use the experimental shared-design
-#' batched L2 solver; unsupported inputs use the scalar path unless explicitly
-#' requested, in which case a clear error is returned.
+#' batched L2 solver. Presence weights can vary by species. Converged species
+#' stop updating independently; unsupported inputs return a clear error.
 #'
 #' @param x A named list of species records. Each record must contain `presence`
 #'   and `background` tables, unless `background` is supplied separately, in which
@@ -43,6 +43,8 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
                                                 "background_weights"),
                              dtype = torch_dtype, device = device)
   converged <- rep(FALSE, species_n)
+  active <- rep(TRUE, species_n)
+  iterations <- rep(NA_integer_, species_n)
   parameter_change <- rep(Inf, species_n)
   gradient_norm <- rep(Inf, species_n)
   for (iteration in seq_len(max_iter)) {
@@ -55,28 +57,38 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
     value <- logz$sum() - Reduce(`+`, presence_loss) +
       0.5 * lambda2 * (beta^2)$sum()
     value$backward()
-    candidate <- torch::with_no_grad({ beta - step * beta$grad })
+    active_t <- torch::torch_tensor(as.numeric(active), dtype = torch_dtype,
+                                    device = device)$reshape(c(species_n, 1L))
+    candidate <- torch::with_no_grad({ beta - step * beta$grad * active_t })
     if (iteration %% as.integer(control$diagnostic_interval %||% 25L) == 0L || iteration == max_iter) {
       delta <- as.matrix(torch::as_array((candidate - beta)$to(device = "cpu")))
       grad <- as.matrix(torch::as_array(beta$grad$to(device = "cpu")))
       parameter_change <- apply(abs(delta), 1L, max)
       gradient_norm <- apply(abs(grad), 1L, max)
-      converged <- parameter_change <= tol
-      if (all(converged)) break
+      newly_converged <- active & parameter_change <= tol
+      converged[newly_converged] <- TRUE
+      iterations[newly_converged] <- iteration
+      active <- !converged
+      if (all(converged)) {
+        beta <- candidate
+        break
+      }
     }
     beta <- candidate
   }
-  list(beta = as.matrix(torch::as_array(beta$to(device = "cpu"))), iterations = iteration,
+  iterations[is.na(iterations)] <- iteration
+  list(beta = as.matrix(torch::as_array(beta$to(device = "cpu"))), iterations = iterations,
        converged = converged, parameter_change = parameter_change,
        gradient_norm = gradient_norm)
 }
 
 #' Fit independent species models from a validated batch specification
 #'
-#' This batch API preserves independent-model semantics and stable species ordering.
+#' This batch API preserves independent-model semantics, stable species ordering,
+#' and per-species convergence diagnostics.
 #' Set `control$batch_solver = "torch"` to use the experimental shared-design
-#' batched L2 solver; unsupported inputs use the scalar path unless explicitly
-#' requested, in which case a clear error is returned.
+#' batched L2 solver. Presence weights can vary by species. Converged species
+#' stop updating independently; unsupported inputs return a clear error.
 #'
 #' @param x A named list of species records. Each record must contain `presence`
 #'   and `background` tables, unless `background` is supplied separately, in which
@@ -183,7 +195,7 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL,
                                    fit$feature_spec$penalty_l1, fit$feature_spec$penalty_l2)
       fit$beta <- beta
       fit$logz <- final$logz
-      fit$diagnostics$iterations <- solver$iterations
+      fit$diagnostics$iterations <- solver$iterations[[index]]
       fit$diagnostics$converged <- solver$converged[[index]]
       fit$diagnostics$stop_reason <- if (fit$diagnostics$converged) "parameter_change" else "max_iter"
       fit$diagnostics$parameter_change <- solver$parameter_change[[index]]
