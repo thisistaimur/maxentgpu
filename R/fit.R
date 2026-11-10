@@ -17,6 +17,14 @@ normalize_penalty <- function(value, n, name, default = 1) {
   as.numeric(value)
 }
 
+optimality_residual <- function(beta, gradient, lambda1, penalty_l1) {
+  residual <- abs(gradient + lambda1 * penalty_l1 * sign(beta))
+  at_zero <- beta == 0
+  residual[at_zero] <- pmax(abs(gradient[at_zero]) -
+                              lambda1 * penalty_l1[at_zero], 0)
+  max(residual)
+}
+
 normalize_execution <- function(control) {
   device <- tolower(as.character(control$device %||% "cpu"))
   dtype <- tolower(as.character(control$dtype %||% "float64"))
@@ -308,7 +316,12 @@ maxent_fit <- function(x, presence, background = NULL,
   parameter_change <- Inf
   smooth_gradient_norm <- Inf
   optimality_norm <- Inf
+  initial_step <- step
   if (is.null(native_result)) for (iteration in seq_len(max_iter)) {
+    # Treat control$step as a per-iteration upper bound. Backtracking may
+    # reduce it for this update, but a tiny local step must not stall all later
+    # iterations or make the parameter-change test appear converged.
+    step <- initial_step
     baseline <- objective_eval(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     values[iteration] <- baseline$value
     current <- objective_eval(y, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
@@ -330,10 +343,8 @@ maxent_fit <- function(x, presence, background = NULL,
       trial <- objective_eval(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     }
     parameter_change <- max(abs(candidate - beta))
-    proximal_candidate <- sign(candidate - step * trial$gradient) *
-      pmax(abs(candidate - step * trial$gradient) -
-             step * lambda1 * spec$penalty_l1, 0)
-    optimality_norm <- max(abs(candidate - proximal_candidate)) / step
+    optimality_norm <- optimality_residual(candidate, trial$gradient,
+                                           lambda1, spec$penalty_l1)
     smooth_gradient_norm <- max(abs(trial$gradient - lambda2 * spec$penalty_l2 * candidate))
     if (parameter_change <= tol && optimality_norm <= tol) {
       beta <- candidate
@@ -362,9 +373,8 @@ maxent_fit <- function(x, presence, background = NULL,
     objective_evaluations <- ceiling(iteration / diagnostic_interval)
   }
   final <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
-  final_proximal <- sign(beta - step * final$gradient) *
-    pmax(abs(beta - step * final$gradient) - step * lambda1 * spec$penalty_l1, 0)
-  optimality_norm <- max(abs(beta - final_proximal)) / step
+  optimality_norm <- optimality_residual(beta, final$gradient,
+                                         lambda1, spec$penalty_l1)
   if (!converged || !is.null(native_result)) {
     parameter_change <- if (is.finite(parameter_change)) parameter_change else NA_real_
     if (is.null(native_result)) {
