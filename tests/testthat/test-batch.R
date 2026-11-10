@@ -117,14 +117,14 @@ test_that("shared-design solver accepts species-specific L2 strengths", {
     x = presence[[index]], presence = presence[[index]], background = background,
     features = "linear",
     regularization = list(lambda1 = 0, lambda2 = unname(lambda2[[index]])),
-    control = list(engine = "torch", device = "cpu", accelerated = FALSE,
-                   step = 0.25, max_iter = 5000L, tol = 1e-7)
+    control = list(engine = "analytic", device = "cpu", accelerated = FALSE,
+                   step = 0.25, max_iter = 1000L, tol = 1e-9)
   ))
   expect_true(all(batch$diagnostics$converged))
   expect_true(all(batch$diagnostics$gradient_norm <= 1e-7))
   expect_true(all(vapply(scalar, function(fit) maxent_diagnostics(fit)$converged,
                          logical(1))))
-  expect_true(all(vapply(scalar, function(fit) maxent_diagnostics(fit)$optimality_norm <= 1e-7,
+  expect_true(all(vapply(scalar, function(fit) maxent_diagnostics(fit)$optimality_norm <= 1e-9,
                          logical(1))))
   expect_equal(unname(predict(batch, background, type = "link", device = "cpu")),
                unname(do.call(cbind, lapply(scalar, predict, newdata = background, type = "link"))),
