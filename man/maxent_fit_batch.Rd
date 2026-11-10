@@ -38,5 +38,6 @@ This batch API preserves independent-model semantics, stable species ordering,
 and per-species convergence diagnostics.
 Set \code{control$batch_solver = "torch"} to use the experimental shared-design
 batched L2 solver. Presence weights can vary by species. Converged species
-stop updating independently; unsupported inputs return a clear error.
+stop updating independently; with this solver \code{regularization$lambda2} may
+be a scalar or a species-named vector. Unsupported inputs return a clear error.
 }

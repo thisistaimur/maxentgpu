@@ -659,7 +659,10 @@ Tasks:
   shared-design solver; weighted parity is covered against scalar Torch fits.
 - [x] Freeze each species' coefficients after it reaches the convergence tolerance and
   report its own convergence iteration.
-- [ ] Implement species-specific penalties and per-species failure reporting.
+- [x] Support species-specific L2 strengths (`regularization$lambda2`) and verify
+  batch predictions against scalar fits.
+- [ ] Support species-specific feature penalty vectors/L1 and isolate per-species
+  input or runtime errors in batch results.
 - [ ] Implement prediction as `X_new %*% t(beta)` in memory-bounded cell/species chunks.
 - [x] Implement shared-design Torch prediction as `X_new %*% t(beta)` with explicit
   species chunking and CUDA device selection.

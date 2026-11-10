@@ -98,6 +98,33 @@ test_that("weighted shared-design solver matches scalar weighted fits", {
                tolerance = 2e-5)
 })
 
+test_that("shared-design solver accepts species-specific L2 strengths", {
+  skip_if_torch_unavailable()
+  background <- data.frame(x1 = seq(0, 3, length.out = 8),
+                           x2 = c(1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5))
+  presence <- list(
+    weak = data.frame(x1 = c(0.2, 0.8, 1.2), x2 = c(1.2, 1.8, 2.2)),
+    strong = data.frame(x1 = c(1.8, 2.4, 2.8), x2 = c(2.8, 3.4, 3.8))
+  )
+  lambda2 <- c(weak = 0.2, strong = 0.8)
+  batch <- maxent_fit_batch(
+    presence, background = background, features = "linear",
+    regularization = list(lambda1 = 0, lambda2 = lambda2),
+    control = list(batch_solver = "torch", engine = "torch", device = "cpu",
+                   max_iter = 1000L, tol = 1e-5, diagnostic_interval = 25L)
+  )
+  scalar <- lapply(seq_along(presence), function(index) maxent_fit(
+    x = presence[[index]], presence = presence[[index]], background = background,
+    features = "linear",
+    regularization = list(lambda1 = 0, lambda2 = unname(lambda2[[index]])),
+    control = list(engine = "torch", device = "cpu", max_iter = 1000L, tol = 1e-5)
+  ))
+  expect_true(all(batch$diagnostics$converged))
+  expect_equal(unname(predict(batch, background, type = "link", device = "cpu")),
+               unname(do.call(cbind, lapply(scalar, predict, newdata = background, type = "link"))),
+               tolerance = 2e-5)
+})
+
 test_that("batch rejects unstable or mismatched species IDs", {
   expect_error(maxent_fit_batch(list(data.frame(x = 1)), background = data.frame(x = 2)), "species")
   expect_error(maxent_fit_batch(list(a = data.frame(x = 1), b = data.frame(x = 2)),

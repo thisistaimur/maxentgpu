@@ -3,7 +3,8 @@
 #' This batch API preserves independent-model semantics and stable species ordering.
 #' Set `control$batch_solver = "torch"` to use the experimental shared-design
 #' batched L2 solver. Presence weights can vary by species. Converged species
-#' stop updating independently; unsupported inputs return a clear error.
+#' stop updating independently; with this solver `regularization$lambda2` may
+#' be a scalar or a species-named vector. Unsupported inputs return a clear error.
 #'
 #' @param x A named list of species records. Each record must contain `presence`
 #'   and `background` tables, unless `background` is supplied separately, in which
@@ -25,6 +26,10 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
   torch_dtype <- if (identical(dtype, "float32")) torch::torch_float32() else torch::torch_float64()
   species_n <- length(presence_phi)
   feature_n <- ncol(background_phi)
+  if (length(lambda2) == 1L) lambda2 <- rep(lambda2, species_n)
+  if (length(lambda2) != species_n || any(!is.finite(lambda2)) || any(lambda2 < 0)) {
+    stop("lambda2 must be one finite non-negative value per species.", call. = FALSE)
+  }
   background_t <- torch::torch_tensor(background_phi, dtype = torch_dtype, device = device)
   presence_t <- lapply(presence_phi, torch::torch_tensor, dtype = torch_dtype, device = device)
   weights_t <- lapply(seq_along(presence_phi), function(index) {
@@ -42,6 +47,8 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
   q_t <- torch::torch_tensor(normalize_weights(background_weights, nrow(background_phi),
                                                 "background_weights"),
                              dtype = torch_dtype, device = device)
+  lambda2_t <- torch::torch_tensor(as.numeric(lambda2), dtype = torch_dtype,
+                                   device = device)$reshape(c(species_n, 1L))
   converged <- rep(FALSE, species_n)
   active <- rep(TRUE, species_n)
   iterations <- rep(NA_integer_, species_n)
@@ -55,7 +62,7 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
       (weights_t[[index]] * presence_t[[index]]$matmul(beta[index, ]))$sum()
     })
     value <- logz$sum() - Reduce(`+`, presence_loss) +
-      0.5 * lambda2 * (beta^2)$sum()
+      (0.5 * lambda2_t * beta^2)$sum()
     value$backward()
     active_t <- torch::torch_tensor(as.numeric(active), dtype = torch_dtype,
                                     device = device)$reshape(c(species_n, 1L))
@@ -88,7 +95,8 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
 #' and per-species convergence diagnostics.
 #' Set `control$batch_solver = "torch"` to use the experimental shared-design
 #' batched L2 solver. Presence weights can vary by species. Converged species
-#' stop updating independently; unsupported inputs return a clear error.
+#' stop updating independently; with this solver `regularization$lambda2` may
+#' be a scalar or a species-named vector. Unsupported inputs return a clear error.
 #'
 #' @param x A named list of species records. Each record must contain `presence`
 #'   and `background` tables, unless `background` is supplied separately, in which
@@ -133,6 +141,26 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL,
   # design; this would defeat the purpose of batching for large species sets.
   fit_control <- control
   if (use_batched_solver) fit_control$max_iter <- 1L
+  lambda2_by_species <- NULL
+  if (use_batched_solver && !is.null(background)) {
+    regularization <- dots$regularization %||% list()
+    lambda2_by_species <- as.numeric(regularization$lambda2 %||% 1)
+    if (length(lambda2_by_species) == 1L) {
+      lambda2_by_species <- rep(lambda2_by_species, length(x))
+    } else if (length(lambda2_by_species) != length(x)) {
+      stop("regularization lambda2 must be scalar or contain one value per species.", call. = FALSE)
+    }
+    lambda2_names <- names(regularization$lambda2)
+    if (!is.null(lambda2_names)) {
+      if (anyDuplicated(lambda2_names) || !setequal(lambda2_names, ids)) {
+        stop("named regularization lambda2 values must match species IDs.", call. = FALSE)
+      }
+      lambda2_by_species <- as.numeric(regularization$lambda2[ids])
+    }
+    if (any(!is.finite(lambda2_by_species)) || any(lambda2_by_species < 0)) {
+      stop("regularization lambda2 values must be finite and non-negative.", call. = FALSE)
+    }
+  }
   if (use_batched_solver && !is.null(background)) {
     if (!is.null(presence_weights) && length(presence_weights) != length(x)) {
       stop("presence_weights must contain one vector per species.", call. = FALSE)
@@ -156,7 +184,12 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL,
       if (!is.null(record$background_weights)) args$background_weights <- record$background_weights
     } else {
       if (!is.data.frame(record) || !nrow(record)) stop("each species presence input must be a non-empty data frame.", call. = FALSE)
-      args <- c(list(presence = record, background = background), dots,
+      fit_dots <- dots
+      if (use_batched_solver) {
+        fit_dots$regularization <- dots$regularization %||% list()
+        fit_dots$regularization$lambda2 <- lambda2_by_species[[index]]
+      }
+      args <- c(list(presence = record, background = background), fit_dots,
                 list(control = fit_control))
       if (!is.null(presence_weights)) args$presence_weights <- presence_weights[[index]]
     }
@@ -179,7 +212,7 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL,
     solver <- torch_batch_solve_l2(
       lapply(fits, function(fit) apply_feature_spec(specs[[1L]], fit$presence)),
       apply_feature_spec(specs[[1L]], background),
-      control = control, lambda2 = as.numeric((dots$regularization %||% list(lambda2 = 1))$lambda2 %||% 1),
+      control = control, lambda2 = lambda2_by_species,
       device = maxent_diagnostics(fits[[1L]])$device,
       dtype = maxent_diagnostics(fits[[1L]])$dtype,
       presence_weights = lapply(fits, `[[`, "presence_weights"),
@@ -191,7 +224,7 @@ maxent_fit_batch <- function(x, species = NULL, background = NULL,
       final <- objective_components(beta, apply_feature_spec(specs[[1L]], fit$presence),
                                    apply_feature_spec(specs[[1L]], background),
                                    fit$presence_weights, fit$background_weights, 0,
-                                   as.numeric((dots$regularization %||% list(lambda2 = 1))$lambda2 %||% 1),
+                                   lambda2_by_species[[index]],
                                    fit$feature_spec$penalty_l1, fit$feature_spec$penalty_l2)
       fit$beta <- beta
       fit$logz <- final$logz
