@@ -117,7 +117,8 @@ test_that("shared-design solver accepts species-specific L2 strengths", {
     x = presence[[index]], presence = presence[[index]], background = background,
     features = "linear",
     regularization = list(lambda1 = 0, lambda2 = unname(lambda2[[index]])),
-    control = list(engine = "torch", device = "cpu", max_iter = 5000L, tol = 1e-7)
+    control = list(engine = "torch", device = "cpu", accelerated = FALSE,
+                   step = 0.25, max_iter = 5000L, tol = 1e-7)
   ))
   expect_true(all(batch$diagnostics$converged))
   expect_equal(unname(predict(batch, background, type = "link", device = "cpu")),
