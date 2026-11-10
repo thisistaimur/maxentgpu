@@ -16,4 +16,5 @@ maxent_diagnostics(object)
 
 ## Value
 
-A diagnostics list.
+A diagnostics list, including the proximal-gradient `optimality_norm`
+used alongside parameter change to determine convergence.
