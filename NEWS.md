@@ -1,4 +1,4 @@
-# maxentgpu 0.2.0
+# maxentgpu 0.2.1
 
 ## Initial development
 
