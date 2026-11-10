@@ -58,3 +58,33 @@ shared_cuda_speedup_over_scalar_cpu: 2.892182
 All species converged and the maximum prediction difference was within tolerance.
 This supports a batching-throughput claim for the shared-design linear/L2 scenario;
 it is not a claim that every scalar CUDA workload is faster than CPU.
+
+## Per-species convergence-mask checkpoint
+
+The same workload was rerun after adding per-species convergence masks on commit
+`e664427abd766075c20c213d695260f275cea3ce`, using the JUWELS Booster A100 and Torch
+0.17.0. Both benchmark modes used three repeats, 2,000 maximum iterations, tolerance
+`1e-6`, and diagnostic interval 25. CUDA batch predictions were checked against the
+scalar CPU result with tolerance `1e-4`.
+
+```text
+shared_batched_cuda_median_seconds: 2.959
+shared_batched_cuda_min_seconds: 2.956
+shared_batched_cuda_max_seconds: 3.082
+shared_batch_cpu_median_seconds: 9.176
+shared_batch_max_abs_difference: 6.256e-05
+
+independent_scalar_cuda_median_seconds: 11.627
+independent_scalar_cuda_min_seconds: 11.518
+independent_scalar_cuda_max_seconds: 11.700
+independent_scalar_cpu_median_seconds: 9.423
+independent_scalar_max_abs_difference: 5.884182e-15
+batch_speedup_over_scalar_cuda: 3.929
+batch_speedup_over_scalar_cpu: 3.101
+```
+
+All species converged. The batched CUDA path remained within the parity tolerance and
+was approximately 3.93x faster than independent scalar CUDA on this workload. Scalar
+CUDA remained slower than scalar CPU. These measurements support the same narrowly
+scoped shared-design batching claim; they do not establish performance for other
+feature classes, penalties, accelerators, or raster workloads.
