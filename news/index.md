@@ -1,6 +1,6 @@
 # Changelog
 
-## maxentgpu 0.1.6
+## maxentgpu 0.3.0
 
 ### Initial development
 

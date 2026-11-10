@@ -1,9 +1,11 @@
 # Fit independent species models from a validated batch specification
 
-This batch API preserves independent-model semantics and stable species
-ordering. Set `control$batch_solver = "torch"` to use the experimental
-shared-design batched L2 solver; unsupported inputs use the scalar path
-unless explicitly requested, in which case a clear error is returned.
+This batch API preserves independent-model semantics, stable species
+ordering, and per-species convergence diagnostics. Set
+`control$batch_solver = "torch"` to use the experimental shared-design
+batched L2 solver. Presence weights can vary by species. Converged
+species stop updating independently; unsupported inputs return a clear
+error.
 
 ## Usage
 
