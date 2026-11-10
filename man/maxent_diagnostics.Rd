@@ -10,7 +10,8 @@ maxent_diagnostics(object)
 \item{object}{A fitted \code{maxent_fit} object.}
 }
 \value{
-A diagnostics list.
+A diagnostics list, including the proximal-gradient \code{optimality_norm}
+used alongside parameter change to determine convergence.
 }
 \description{
 Return fit diagnostics

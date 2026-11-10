@@ -121,6 +121,11 @@ test_that("shared-design solver accepts species-specific L2 strengths", {
                    step = 0.25, max_iter = 5000L, tol = 1e-7)
   ))
   expect_true(all(batch$diagnostics$converged))
+  expect_true(all(batch$diagnostics$gradient_norm <= 1e-7))
+  expect_true(all(vapply(scalar, function(fit) maxent_diagnostics(fit)$converged,
+                         logical(1))))
+  expect_true(all(vapply(scalar, function(fit) maxent_diagnostics(fit)$optimality_norm <= 1e-7,
+                         logical(1))))
   expect_equal(unname(predict(batch, background, type = "link", device = "cpu")),
                unname(do.call(cbind, lapply(scalar, predict, newdata = background, type = "link"))),
                tolerance = 2e-5)

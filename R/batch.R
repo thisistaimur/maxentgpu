@@ -72,7 +72,7 @@ torch_batch_solve_l2 <- function(presence_phi, background_phi, control, lambda2,
       grad <- as.matrix(torch::as_array(beta$grad$to(device = "cpu")))
       parameter_change <- apply(abs(delta), 1L, max)
       gradient_norm <- apply(abs(grad), 1L, max)
-      newly_converged <- active & parameter_change <= tol
+      newly_converged <- active & parameter_change <= tol & gradient_norm <= tol
       converged[newly_converged] <- TRUE
       iterations[newly_converged] <- iteration
       active <- !converged

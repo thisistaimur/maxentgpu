@@ -307,6 +307,7 @@ maxent_fit <- function(x, presence, background = NULL,
   stop_reason <- "max_iter"
   parameter_change <- Inf
   smooth_gradient_norm <- Inf
+  optimality_norm <- Inf
   if (is.null(native_result)) for (iteration in seq_len(max_iter)) {
     baseline <- objective_eval(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     values[iteration] <- baseline$value
@@ -328,16 +329,18 @@ maxent_fit <- function(x, presence, background = NULL,
       candidate <- sign(candidate) * pmax(abs(candidate) - step * lambda1 * spec$penalty_l1, 0)
       trial <- objective_eval(candidate, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
     }
-    if (max(abs(candidate - beta)) <= tol) {
-      parameter_change <- max(abs(candidate - beta))
-      smooth_gradient_norm <- max(abs(trial$gradient - lambda2 * spec$penalty_l2 * candidate))
+    parameter_change <- max(abs(candidate - beta))
+    proximal_candidate <- sign(candidate - step * trial$gradient) *
+      pmax(abs(candidate - step * trial$gradient) -
+             step * lambda1 * spec$penalty_l1, 0)
+    optimality_norm <- max(abs(candidate - proximal_candidate)) / step
+    smooth_gradient_norm <- max(abs(trial$gradient - lambda2 * spec$penalty_l2 * candidate))
+    if (parameter_change <= tol && optimality_norm <= tol) {
       beta <- candidate
       converged <- TRUE
       stop_reason <- "parameter_change"
       break
     }
-    parameter_change <- max(abs(candidate - beta))
-    smooth_gradient_norm <- max(abs(trial$gradient - lambda2 * spec$penalty_l2 * candidate))
     previous <- beta
     beta <- candidate
     if (accelerated) {
@@ -351,13 +354,17 @@ maxent_fit <- function(x, presence, background = NULL,
   if (!is.null(native_result)) {
     iteration <- native_result$iterations
     values <- native_result$values
-    converged <- native_result$converged
+    converged <- native_result$converged && native_result$gradient_norm <= tol
     stop_reason <- if (converged) "parameter_change" else "max_iter"
     parameter_change <- native_result$parameter_change
     smooth_gradient_norm <- native_result$gradient_norm
+    optimality_norm <- native_result$gradient_norm
     objective_evaluations <- ceiling(iteration / diagnostic_interval)
   }
   final <- objective_components(beta, presence_phi, background_phi, w, q, lambda1, lambda2, spec$penalty_l1, spec$penalty_l2)
+  final_proximal <- sign(beta - step * final$gradient) *
+    pmax(abs(beta - step * final$gradient) - step * lambda1 * spec$penalty_l1, 0)
+  optimality_norm <- max(abs(beta - final_proximal)) / step
   if (!converged || !is.null(native_result)) {
     parameter_change <- if (is.finite(parameter_change)) parameter_change else NA_real_
     if (is.null(native_result)) {
@@ -374,6 +381,7 @@ maxent_fit <- function(x, presence, background = NULL,
                                     objective = values, final_objective = final$value,
                                     parameter_change = parameter_change,
                                     smooth_gradient_norm = smooth_gradient_norm,
+                                    optimality_norm = optimality_norm,
                                     stop_reason = stop_reason,
                                     device = execution$device, dtype = execution$dtype,
                                     engine = execution$engine,
@@ -402,7 +410,8 @@ predict.maxent_fit <- function(object, newdata, type = c("raw", "link"), ...) {
 
 #' Return fit diagnostics
 #' @param object A fitted `maxent_fit` object.
-#' @return A diagnostics list.
+#' @return A diagnostics list, including the proximal-gradient `optimality_norm`
+#'   used alongside parameter change to determine convergence.
 #' @export
 maxent_diagnostics <- function(object) {
   if (!inherits(object, "maxent_fit")) stop("object is not a maxent_fit model.", call. = FALSE)
