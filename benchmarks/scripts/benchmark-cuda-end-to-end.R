@@ -43,23 +43,28 @@ control_cuda <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
 
 sync <- function() torch::cuda_synchronize()
 run_cpu <- function() {
-  models <- lapply(presence, function(p) maxentgpu::maxent_fit(
-    presence = p, background = background, features = "linear",
-    regularization = regularization, control = control_cpu))
-  diagnostics <- do.call(rbind, lapply(seq_along(models), function(index) {
+  models <- vector("list", length(presence))
+  names(models) <- names(presence)
+  diagnostics <- vector("list", length(presence))
+  for (index in seq_along(presence)) {
+    models[[index]] <- maxentgpu::maxent_fit(
+      presence = presence[[index]], background = background, features = "linear",
+      regularization = regularization, control = control_cpu)
     d <- maxentgpu::maxent_diagnostics(models[[index]])
-    data.frame(species = names(models)[[index]], iterations = d$iterations,
-               converged = d$converged, stop_reason = d$stop_reason,
-               parameter_change = d$parameter_change,
-               optimality_norm = d$optimality_norm,
-               stringsAsFactors = FALSE)
-  }))
-  if (!all(diagnostics$converged)) {
-    failed <- diagnostics[!diagnostics$converged, , drop = FALSE]
-    print(failed, row.names = FALSE)
-    stop("CPU scalar fit did not converge for every species; refusing an incomparable timing.",
-         call. = FALSE)
+    diagnostics[[index]] <- data.frame(
+      species = names(presence)[[index]], iterations = d$iterations,
+      converged = d$converged, stop_reason = d$stop_reason,
+      parameter_change = d$parameter_change,
+      optimality_norm = d$optimality_norm,
+      stringsAsFactors = FALSE
+    )
+    if (!isTRUE(d$converged)) {
+      print(diagnostics[[index]], row.names = FALSE)
+      stop("CPU scalar fit did not converge for every species; refusing an incomparable timing.",
+           call. = FALSE)
+    }
   }
+  diagnostics <- do.call(rbind, diagnostics)
   list(prediction = do.call(cbind, lapply(models, predict, newdata = background, type = "link")),
        diagnostics = diagnostics)
 }
