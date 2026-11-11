@@ -1,7 +1,8 @@
 # CUDA end-to-end fit-plus-predict performance checkpoint
 
-This benchmark compares the same Torch engine on CPU and CUDA. It includes fitting
-and prediction, uses identical controls, and requires every species to converge.
+This manifest contains historical same-Torch CPU/CUDA measurements and the current
+analytic-CPU versus shared-design-Torch-CUDA package-route comparison. Every accepted
+measurement includes fitting and prediction, convergence checks, and parity checks.
 
 ## Provenance
 
@@ -101,6 +102,34 @@ the starting step from 1 to 0.01 or 0.001 did not resolve the Torch result.
 
 The end-to-end benchmark now compares the package's analytic scalar CPU route with
 the shared-design Torch CUDA route. This is an end-to-end package-route comparison,
-not an isolated device-only comparison. A new JUWELS run is required before making
-an updated CPU-versus-CUDA performance claim. The CPU Torch scalar convergence issue
+not an isolated device-only comparison. The CPU Torch scalar convergence issue
 remains a separate solver investigation.
+
+## Current analytic CPU versus shared-design CUDA checkpoint
+
+Run on the JUWELS Booster A100 using commit `5a525c83cb953724eac199ab96e0444ec3ba7efa`,
+Torch 0.17.0, and the same 64-species linear/L2 workload described above. The CPU
+route used the analytic solver; CUDA used the shared-design Torch batch solver.
+
+```text
+repeats: 3
+max_iter: 2000
+fit_tol: 1e-6
+parity_tolerance: 1e-4
+max_abs_difference: 1.225353e-06
+cuda_median_seconds: 3.085
+cuda_min_seconds: 3.022
+cuda_max_seconds: 3.111
+cpu_median_seconds: 2.240
+cpu_min_seconds: 2.192
+cpu_max_seconds: 2.271
+cpu_converged_species: 64 / 64
+cpu_median_iterations: 19.5
+speedup_cpu_over_cuda: 0.726094
+```
+
+All 64 CPU fits converged and CUDA predictions passed parity. On this workload, the
+analytic CPU route was about 1.38x faster than the shared-design CUDA route. Thus this
+checkpoint demonstrates numerical agreement and batching throughput, but not an
+end-to-end GPU speedup over the package's analytic CPU route. Conclusions remain
+limited to this workload and hardware.
