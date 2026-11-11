@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 
-# End-to-end benchmark: independent scalar CPU Torch fit+predict versus the current
-# CUDA batch API. Using the same Torch engine isolates device performance.
+# End-to-end benchmark: the package's analytic scalar CPU fit+predict route versus
+# the shared-design Torch CUDA batch API. This is a package-route comparison, not an
+# isolated device-only comparison.
 
 root <- if (length(commandArgs(trailingOnly = TRUE))) normalizePath(commandArgs(trailingOnly = TRUE)[[1L]]) else normalizePath(".")
 setwd(root)
@@ -35,7 +36,7 @@ presence <- lapply(seq_len(species_n), function(index) {
 names(presence) <- sprintf("species_%03d", seq_len(species_n))
 regularization <- list(lambda1 = 0, lambda2 = 0.4)
 control_cpu <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
-                    engine = "torch", device = "cpu", dtype = "float64")
+                    engine = "analytic", device = "cpu", dtype = "float64")
 control_cuda <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                      engine = "torch", device = "cuda", dtype = "float64",
                      native = native, diagnostic_interval = diagnostic_interval,
@@ -100,7 +101,7 @@ cat("commit:", system("git rev-parse HEAD", intern = TRUE), "\n")
 cat("species:", species_n, "background:", background_n, "presence/species:", presence_n,
     "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
     "diagnostic_interval:", diagnostic_interval, "native:", native,
-    "batch_solver:", batch_solver, "\n")
+    "batch_solver:", batch_solver, "cpu_engine: analytic\n")
 max_difference <- max(abs(cuda$result - cpu$result$prediction))
 cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n")
 if (max_difference > parity_tol) {

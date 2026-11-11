@@ -678,9 +678,12 @@ Tasks:
 - [x] Run larger CUDA batch prediction measurements with fully converged fixtures;
   results and the no-speedup conclusion are archived in
   `benchmarks/manifests/cuda-batch-performance.md`.
-- [x] Run an end-to-end Torch CPU-versus-CUDA fit-plus-predict benchmark with matching
-  controls; results and the parity/no-speedup conclusion are archived in
-  `benchmarks/manifests/cuda-end-to-end-performance.md`.
+- [x] Archive the historical same-Torch CPU-versus-CUDA fit-plus-predict benchmark.
+  Subsequent JUWELS diagnostics found the CPU Torch scalar solver can stall without
+  convergence on the larger workload; that timing is not a current performance claim.
+- [ ] Re-run end-to-end fit-plus-predict with the analytic scalar CPU route versus the
+  shared-design Torch CUDA route, verify convergence and prediction parity, and archive
+  the result. This is a package-route comparison rather than device-only isolation.
 - [x] Re-run the end-to-end benchmark with the shared-design batched solver and archive
   the A100 comparison against independent scalar CUDA and CPU fits. The checkpoint
   records a 3.93x batching improvement over scalar CUDA and 3.10x over scalar CPU for

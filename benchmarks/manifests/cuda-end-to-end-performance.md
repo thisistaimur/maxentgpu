@@ -88,3 +88,19 @@ was approximately 3.93x faster than independent scalar CUDA on this workload. Sc
 CUDA remained slower than scalar CPU. These measurements support the same narrowly
 scoped shared-design batching claim; they do not establish performance for other
 feature classes, penalties, accelerators, or raster workloads.
+
+## CPU Torch scalar convergence follow-up
+
+The CPU-versus-CUDA scalar Torch timing above is a historical checkpoint, not a
+currently reproducible comparison. On JUWELS commit `a2f72ab`, the 64-species CPU
+Torch scalar run failed its convergence gate: `species_023` reached 2,000 iterations
+with `optimality_norm = 2.314621e-6` at tolerance `1e-6`. Reproducing that species
+alone showed the CPU analytic solver converged in 20 iterations (`optimality_norm =
+2.990195e-7`), while CPU Torch did not converge within 2,000 iterations. Changing
+the starting step from 1 to 0.01 or 0.001 did not resolve the Torch result.
+
+The end-to-end benchmark now compares the package's analytic scalar CPU route with
+the shared-design Torch CUDA route. This is an end-to-end package-route comparison,
+not an isolated device-only comparison. A new JUWELS run is required before making
+an updated CPU-versus-CUDA performance claim. The CPU Torch scalar convergence issue
+remains a separate solver investigation.
