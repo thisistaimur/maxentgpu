@@ -46,7 +46,22 @@ run_cpu <- function() {
   models <- lapply(presence, function(p) maxentgpu::maxent_fit(
     presence = p, background = background, features = "linear",
     regularization = regularization, control = control_cpu))
-  do.call(cbind, lapply(models, predict, newdata = background, type = "link"))
+  diagnostics <- do.call(rbind, lapply(seq_along(models), function(index) {
+    d <- maxentgpu::maxent_diagnostics(models[[index]])
+    data.frame(species = names(models)[[index]], iterations = d$iterations,
+               converged = d$converged, stop_reason = d$stop_reason,
+               parameter_change = d$parameter_change,
+               optimality_norm = d$optimality_norm,
+               stringsAsFactors = FALSE)
+  }))
+  if (!all(diagnostics$converged)) {
+    failed <- diagnostics[!diagnostics$converged, , drop = FALSE]
+    print(failed, row.names = FALSE)
+    stop("CPU scalar fit did not converge for every species; refusing an incomparable timing.",
+         call. = FALSE)
+  }
+  list(prediction = do.call(cbind, lapply(models, predict, newdata = background, type = "link")),
+       diagnostics = diagnostics)
 }
 run_cuda <- function() {
   model <- maxentgpu::maxent_fit_batch(
@@ -81,7 +96,7 @@ cat("species:", species_n, "background:", background_n, "presence/species:", pre
     "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
     "diagnostic_interval:", diagnostic_interval, "native:", native,
     "batch_solver:", batch_solver, "\n")
-max_difference <- max(abs(cuda$result - cpu$result))
+max_difference <- max(abs(cuda$result - cpu$result$prediction))
 cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n")
 if (max_difference > parity_tol) {
   stop("fit-plus-predict parity exceeded MAXENTGPU_E2E_PARITY_TOL.", call. = FALSE)
@@ -92,4 +107,6 @@ cat("cuda_max_seconds:", cuda$time[["max"]], "\n")
 cat("cpu_median_seconds:", cpu$time[["median"]], "\n")
 cat("cpu_min_seconds:", cpu$time[["min"]], "\n")
 cat("cpu_max_seconds:", cpu$time[["max"]], "\n")
+cat("cpu_converged_species:", sum(cpu$result$diagnostics$converged), "/", species_n, "\n")
+cat("cpu_median_iterations:", median(cpu$result$diagnostics$iterations), "\n")
 cat("speedup_cpu_over_cuda:", cpu$time[["median"]] / cuda$time[["median"]], "\n")
