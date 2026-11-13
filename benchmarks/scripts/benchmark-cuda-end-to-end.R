@@ -19,10 +19,11 @@ batch_solver <- identical(toupper(Sys.getenv("MAXENTGPU_E2E_BATCH_SOLVER", "FALS
 fit_tol <- as.numeric(Sys.getenv("MAXENTGPU_E2E_TOL", "1e-8"))
 parity_tol <- as.numeric(Sys.getenv("MAXENTGPU_E2E_PARITY_TOL", "1e-7"))
 diagnostic_interval <- as.integer(Sys.getenv("MAXENTGPU_E2E_DIAGNOSTIC_INTERVAL", "5"))
+cuda_step <- as.numeric(Sys.getenv("MAXENTGPU_E2E_STEP", "0.25"))
 if (any(!is.finite(c(species_n, background_n, presence_n, repeats, max_iter,
-                     fit_tol, parity_tol, diagnostic_interval))) ||
+                     fit_tol, parity_tol, diagnostic_interval, cuda_step))) ||
     any(c(species_n, background_n, presence_n, repeats, max_iter,
-          diagnostic_interval) < 1) || any(c(fit_tol, parity_tol) <= 0)) {
+          diagnostic_interval) < 1) || any(c(fit_tol, parity_tol, cuda_step) <= 0)) {
   stop("Benchmark controls must be positive.", call. = FALSE)
 }
 
@@ -39,6 +40,7 @@ control_cpu <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                     engine = "analytic", device = "cpu", dtype = "float64")
 control_cuda <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                      engine = "torch", device = "cuda", dtype = "float64",
+                     step = cuda_step,
                      native = native, diagnostic_interval = diagnostic_interval,
                      batch_solver = if (batch_solver) "torch" else NULL)
 
@@ -150,7 +152,8 @@ cat("commit:", commit, "\n")
 cat("species:", species_n, "background:", background_n, "presence/species:", presence_n,
     "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
     "diagnostic_interval:", diagnostic_interval, "native:", native,
-    "batch_solver:", batch_solver, "cpu_engine: analytic\n")
+    "batch_solver:", batch_solver, "cpu_engine: analytic", "cuda_step:",
+    cuda_step, "\n")
 max_difference <- max(abs(cuda$result$prediction - cpu$result$prediction))
 cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n")
 if (max_difference > parity_tol) {

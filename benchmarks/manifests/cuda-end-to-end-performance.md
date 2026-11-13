@@ -133,3 +133,29 @@ analytic CPU route was about 1.38x faster than the shared-design CUDA route. Thu
 checkpoint demonstrates numerical agreement and batching throughput, but not an
 end-to-end GPU speedup over the package's analytic CPU route. Conclusions remain
 limited to this workload and hardware.
+
+## Diagnostic-interval and initial scaling follow-up
+
+The stage-level benchmark was run on the A100 with 128 species, 10,000 background
+rows, 128 presences/species, and the analytic CPU route. The login-node revision was
+`20ce4a5f4b552ad2edb01856ed434da4d6e15a74`; Git was unavailable on the compute node,
+so the script printed `commit: unavailable`. All four runs converged for all species
+and passed the `1e-4` prediction-parity gate.
+
+| CUDA diagnostic interval | CUDA fit (s) | CUDA predict (s) | CUDA end-to-end (s) | CUDA median iterations/species | CPU end-to-end (s) | Max abs. difference |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1  | 5.778 | 0.100 | 5.884 | 48 | 4.275 | 1.512684e-06 |
+| 5  | 5.759 | 0.097 | 5.848 | 50 | 4.200 | 1.416190e-06 |
+| 10 | 5.684 | 0.138 | 5.866 | 50 | 4.221 | 1.229037e-06 |
+| 25 | 5.726 | 0.097 | 5.831 | 50 | 4.110 | 1.229037e-06 |
+
+Checking convergence every iteration reduced the CUDA iteration count only modestly
+and did not reduce elapsed time; the runtime variation across intervals was small
+relative to the CPU/CUDA gap. At all intervals the analytic CPU route was about
+1.38–1.42x faster end-to-end. Initial scaling at 64, 128, and 256 species with 10,000
+background rows likewise showed no break-even for the tested two-predictor design.
+
+The current implementation uses a fixed shared-solver step (default `0.25`), whereas
+the scalar analytic CPU solver uses objective backtracking. The next experiment
+therefore sweeps the CUDA step size under the same convergence and parity checks before
+expanding to more predictors and large raster-prediction workloads.
