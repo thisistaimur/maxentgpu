@@ -10,13 +10,13 @@ Source:
 [`DESCRIPTION`](https://github.com/thisistaimur/maxentgpu/blob/main/DESCRIPTION)
 
 Khan T (2026). *maxentgpu: Maximum-Entropy Presence-Background Models
-with Torch*. R package version 0.2.8,
+with Torch*. R package version 0.2.9,
 <https://github.com/thisistaimur/maxentgpu>.
 
     @Manual{,
       title = {maxentgpu: Maximum-Entropy Presence-Background Models with Torch},
       author = {Taimur Khan},
       year = {2026},
-      note = {R package version 0.2.8},
+      note = {R package version 0.2.9},
       url = {https://github.com/thisistaimur/maxentgpu},
     }
