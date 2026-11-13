@@ -156,6 +156,25 @@ relative to the CPU/CUDA gap. At all intervals the analytic CPU route was about
 background rows likewise showed no break-even for the tested two-predictor design.
 
 The current implementation uses a fixed shared-solver step (default `0.25`), whereas
-the scalar analytic CPU solver uses objective backtracking. The next experiment
-therefore sweeps the CUDA step size under the same convergence and parity checks before
-expanding to more predictors and large raster-prediction workloads.
+the scalar analytic CPU solver uses objective backtracking. The step-size sweep below
+tests whether a larger stable CUDA step can reduce the iteration gap before expanding
+to more predictors and large raster-prediction workloads.
+
+## Shared-solver step-size sweep
+
+On the same JUWELS A100 128-species workload and revision
+`0318edbd138afebe74e08c29fa3f4fede66878d8`, the CUDA shared-design step was swept with
+the diagnostic interval fixed at 5. All 128 species converged in every run; all
+predictions passed the `1e-4` parity gate.
+
+| CUDA step | CUDA fit (s) | CUDA predict (s) | CUDA end-to-end (s) | CUDA median iterations/species | CPU end-to-end (s) | CPU median iterations/species | Max abs. difference |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.25 | 5.737 | 0.096 | 5.824 | 50 | 4.157 | 19.5 | 1.416190e-06 |
+| 0.35 | 4.758 | 0.085 | 4.843 | 35 | 4.256 | 19.5 | 1.296294e-06 |
+| 0.50 | 4.055 | 0.095 | 4.152 | 25 | 4.207 | 19.5 | 1.243862e-06 |
+
+Increasing the CUDA step improved fit time and reduced iterations without harming
+convergence or parity. At step `0.5`, end-to-end medians were nearly tied: CUDA 4.152 s
+and CPU 4.207 s. Their observed timing ranges overlap, so this is not evidence of a
+reliable GPU speedup. Keep the package default unchanged until the larger-workload and
+robustness checks are complete.

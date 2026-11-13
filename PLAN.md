@@ -689,9 +689,12 @@ Tasks:
   counts while increasing the workload to 256 species. No break-even was observed for
   two predictors and 10,000 background rows; the result is archived in
   `benchmarks/manifests/cuda-end-to-end-performance.md`.
-- [ ] Tune the shared CUDA solver's fixed step size under convergence/parity gates,
-  then profile larger predictor/background and raster-prediction workloads to search
-  for a representative GPU break-even point.
+- [x] Sweep the shared CUDA solver's fixed step size under convergence/parity gates.
+  Step `0.5` brought the 128-species workload close to CPU parity in wall time; keep the
+  default unchanged until broader validation. Results are in the CUDA performance manifest.
+- [ ] Validate the candidate CUDA step at larger species counts and more representative
+  predictor/background sizes, then profile raster prediction to locate a reliable GPU
+  break-even point.
 - [x] Re-run the end-to-end benchmark with the shared-design batched solver and archive
   the A100 comparison against independent scalar CUDA and CPU fits. The checkpoint
   records a 3.93x batching improvement over scalar CUDA and 3.10x over scalar CPU for
