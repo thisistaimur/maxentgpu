@@ -151,7 +151,7 @@ cat("species:", species_n, "background:", background_n, "presence/species:", pre
     "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
     "diagnostic_interval:", diagnostic_interval, "native:", native,
     "batch_solver:", batch_solver, "cpu_engine: analytic\n")
-max_difference <- max(abs(cuda$result - cpu$result$prediction))
+max_difference <- max(abs(cuda$result$prediction - cpu$result$prediction))
 cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n")
 if (max_difference > parity_tol) {
   stop("fit-plus-predict parity exceeded MAXENTGPU_E2E_PARITY_TOL.", call. = FALSE)
