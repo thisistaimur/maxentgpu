@@ -43,7 +43,7 @@ control_cuda <- list(max_iter = max_iter, tol = fit_tol, accelerated = FALSE,
                      batch_solver = if (batch_solver) "torch" else NULL)
 
 sync <- function() torch::cuda_synchronize()
-run_cpu <- function() {
+fit_cpu <- function() {
   models <- vector("list", length(presence))
   names(models) <- names(presence)
   diagnostics <- vector("list", length(presence))
@@ -65,11 +65,12 @@ run_cpu <- function() {
            call. = FALSE)
     }
   }
-  diagnostics <- do.call(rbind, diagnostics)
-  list(prediction = do.call(cbind, lapply(models, predict, newdata = background, type = "link")),
-       diagnostics = diagnostics)
+  list(models = models, diagnostics = do.call(rbind, diagnostics))
 }
-run_cuda <- function() {
+predict_cpu <- function(models) {
+  do.call(cbind, lapply(models, predict, newdata = background, type = "link"))
+}
+fit_cuda <- function() {
   model <- maxentgpu::maxent_fit_batch(
     presence, background = background, features = "linear",
     regularization = regularization, control = control_cuda)
@@ -78,26 +79,74 @@ run_cuda <- function() {
     print(failed[, c("species", "iterations", "stop_reason", "parameter_change", "gradient_norm")], row.names = FALSE)
     stop("CUDA fit did not converge for every species.", call. = FALSE)
   }
+  model
+}
+predict_cuda <- function(model) {
   predict(model, background, type = "link", device = "cuda", dtype = "float64", batch_size = 32L)
 }
-
-invisible(run_cuda()); sync()
-invisible(run_cpu())
-measure <- function(fun, synchronize = FALSE) {
-  elapsed <- numeric(repeats)
-  for (i in seq_len(repeats)) {
-    started <- proc.time()[["elapsed"]]
-    result <- fun()
-    if (synchronize) sync()
-    elapsed[[i]] <- proc.time()[["elapsed"]] - started
-  }
-  list(time = c(median = median(elapsed), min = min(elapsed), max = max(elapsed)), result = result)
+run_cpu <- function() {
+  total_started <- proc.time()[["elapsed"]]
+  fit_started <- total_started
+  fitted <- fit_cpu()
+  fit_seconds <- proc.time()[["elapsed"]] - fit_started
+  predict_started <- proc.time()[["elapsed"]]
+  prediction <- predict_cpu(fitted$models)
+  predict_seconds <- proc.time()[["elapsed"]] - predict_started
+  list(fit_seconds = fit_seconds, predict_seconds = predict_seconds,
+       total_seconds = proc.time()[["elapsed"]] - total_started,
+       prediction = prediction, diagnostics = fitted$diagnostics)
 }
-cuda <- measure(run_cuda, synchronize = TRUE)
-cpu <- measure(run_cpu)
+run_cuda <- function() {
+  total_started <- proc.time()[["elapsed"]]
+  fit_started <- total_started
+  model <- fit_cuda()
+  sync()
+  fit_seconds <- proc.time()[["elapsed"]] - fit_started
+  predict_started <- proc.time()[["elapsed"]]
+  prediction <- predict_cuda(model)
+  sync()
+  predict_seconds <- proc.time()[["elapsed"]] - predict_started
+  list(fit_seconds = fit_seconds, predict_seconds = predict_seconds,
+       total_seconds = proc.time()[["elapsed"]] - total_started,
+       prediction = prediction, diagnostics = model$diagnostics)
+}
+summarize_runs <- function(results) {
+  summarize <- function(field) {
+    elapsed <- vapply(results, `[[`, numeric(1), field)
+    c(median = median(elapsed), min = min(elapsed), max = max(elapsed))
+  }
+  list(fit_time = summarize("fit_seconds"),
+       predict_time = summarize("predict_seconds"),
+       end_to_end_time = summarize("total_seconds"),
+       result = results[[length(results)]])
+}
+measure_pair <- function() {
+  runners <- list(cuda = run_cuda, cpu = run_cpu)
+  results <- list(cuda = vector("list", repeats), cpu = vector("list", repeats))
+  # Warm both routes, then alternate their order to reduce systematic order bias.
+  invisible(run_cuda())
+  invisible(run_cpu())
+  for (i in seq_len(repeats)) {
+    route_order <- if (i %% 2L == 1L) c("cuda", "cpu") else c("cpu", "cuda")
+    for (route in route_order) results[[route]][[i]] <- runners[[route]]()
+  }
+  lapply(results, summarize_runs)
+}
+measured <- measure_pair()
+cuda <- measured$cuda
+cpu <- measured$cpu
 
 cat("CUDA end-to-end fit-plus-predict benchmark\n")
-cat("commit:", system("git rev-parse HEAD", intern = TRUE), "\n")
+git_executable <- Sys.which("git")
+commit <- if (nzchar(git_executable)) {
+  tryCatch({
+    value <- suppressWarnings(system2(git_executable, c("rev-parse", "HEAD"),
+                                      stdout = TRUE, stderr = FALSE))
+    status <- attr(value, "status")
+    if (is.null(status) || status == 0L) paste(value, collapse = "") else "unavailable"
+  }, error = function(error) "unavailable")
+} else "unavailable"
+cat("commit:", commit, "\n")
 cat("species:", species_n, "background:", background_n, "presence/species:", presence_n,
     "repeats:", repeats, "max_iter:", max_iter, "fit_tol:", fit_tol,
     "diagnostic_interval:", diagnostic_interval, "native:", native,
@@ -107,12 +156,20 @@ cat("max_abs_difference:", max_difference, "parity_tolerance:", parity_tol, "\n"
 if (max_difference > parity_tol) {
   stop("fit-plus-predict parity exceeded MAXENTGPU_E2E_PARITY_TOL.", call. = FALSE)
 }
-cat("cuda_median_seconds:", cuda$time[["median"]], "\n")
-cat("cuda_min_seconds:", cuda$time[["min"]], "\n")
-cat("cuda_max_seconds:", cuda$time[["max"]], "\n")
-cat("cpu_median_seconds:", cpu$time[["median"]], "\n")
-cat("cpu_min_seconds:", cpu$time[["min"]], "\n")
-cat("cpu_max_seconds:", cpu$time[["max"]], "\n")
-cat("cpu_converged_species:", sum(cpu$result$diagnostics$converged), "/", species_n, "\n")
-cat("cpu_median_iterations:", median(cpu$result$diagnostics$iterations), "\n")
-cat("speedup_cpu_over_cuda:", cpu$time[["median"]] / cuda$time[["median"]], "\n")
+for (route in c("cuda", "cpu")) {
+  result <- get(route)
+  cat(route, "fit_median_seconds:", result$fit_time[["median"]], "\n")
+  cat(route, "fit_min_seconds:", result$fit_time[["min"]], "\n")
+  cat(route, "fit_max_seconds:", result$fit_time[["max"]], "\n")
+  cat(route, "predict_median_seconds:", result$predict_time[["median"]], "\n")
+  cat(route, "predict_min_seconds:", result$predict_time[["min"]], "\n")
+  cat(route, "predict_max_seconds:", result$predict_time[["max"]], "\n")
+  cat(route, "end_to_end_median_seconds:", result$end_to_end_time[["median"]], "\n")
+  cat(route, "end_to_end_min_seconds:", result$end_to_end_time[["min"]], "\n")
+  cat(route, "end_to_end_max_seconds:", result$end_to_end_time[["max"]], "\n")
+  cat(route, "converged_species:", sum(result$result$diagnostics$converged), "/", species_n, "\n")
+  cat(route, "median_iterations:", median(result$result$diagnostics$iterations), "\n")
+  cat(route, "total_iterations:", sum(result$result$diagnostics$iterations), "\n")
+}
+cat("speedup_cpu_over_cuda:", cpu$end_to_end_time[["median"]] /
+      cuda$end_to_end_time[["median"]], "\n")

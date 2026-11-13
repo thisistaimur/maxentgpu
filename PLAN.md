@@ -685,6 +685,8 @@ Tasks:
   shared-design Torch CUDA route, verify convergence and prediction parity, and archive
   the result. On the tested 64-species A100 workload, CPU was about 1.38x faster; this
   package-route comparison does not support an end-to-end GPU speedup claim.
+- [ ] Use stage-level CPU/CUDA fit and prediction timings, per-route iteration counts,
+  and increasing workload sizes to identify the end-to-end GPU break-even point.
 - [x] Re-run the end-to-end benchmark with the shared-design batched solver and archive
   the A100 comparison against independent scalar CUDA and CPU fits. The checkpoint
   records a 3.93x batching improvement over scalar CUDA and 3.10x over scalar CPU for
